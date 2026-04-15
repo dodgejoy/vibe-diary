@@ -14,7 +14,8 @@ import {
   SimilarGames,
   CommunityDiscussions,
   GameScratchpad,
-  SteamDeckCompanion
+  SteamDeckCompanion,
+  GameShareModal
 } from '@/components';
 import { 
   getGameDetails, 
@@ -23,7 +24,7 @@ import {
   getGameRedditPosts,
   GameDetails 
 } from '@/lib/rawg';
-import { ArrowLeft, Trash2, Loader } from 'lucide-react';
+import { ArrowLeft, Trash2, Loader, Share2 } from 'lucide-react';
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -39,6 +40,7 @@ export default function GameDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
 
   useEffect(() => {
@@ -188,13 +190,23 @@ export default function GameDetailPage() {
       <div className="relative z-10 py-8 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900/50 hover:bg-slate-800 border border-white/5 rounded-xl text-slate-300 hover:text-white transition-all mb-10 shadow-lg backdrop-blur-xl group"
-          >
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Library</span>
-          </Link>
+          <div className="flex items-center justify-between mb-10">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900/50 hover:bg-slate-800 border border-white/5 rounded-xl text-slate-300 hover:text-white transition-all shadow-lg backdrop-blur-xl group"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Back to Library</span>
+            </Link>
+
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 border border-violet-400/20 rounded-xl text-white font-bold transition-all shadow-lg shadow-violet-900/40 group active:scale-95"
+            >
+              <Share2 size={18} className="group-hover:rotate-12 transition-transform" />
+              <span>Share Experience</span>
+            </button>
+          </div>
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -410,6 +422,16 @@ export default function GameDetailPage() {
           gameTitle={game.title}
           isOpen={isRatingModalOpen}
           onOpenChange={setIsRatingModalOpen}
+        />
+      )}
+
+      {/* Share Modal */}
+      {game && (
+        <GameShareModal
+          game={game}
+          gameDetails={gameDetails}
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
         />
       )}
 
