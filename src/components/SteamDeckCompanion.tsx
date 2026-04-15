@@ -38,76 +38,81 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
   const hasChanges = currentStatus !== status || currentSettings !== settings;
 
   return (
-    <div className="bg-slate-900 shadow-xl border border-slate-800 rounded-2xl overflow-hidden relative group">
+    <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden relative group shadow-2xl">
       {/* Cool Header matching Steam OS vibes */}
-      <div className="bg-gradient-to-r from-[#1a9fff]/10 to-transparent p-5 border-b border-[#1a9fff]/20">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#1a9fff]/20 rounded-lg text-[#1a9fff]">
+      <div className="bg-gradient-to-r from-sky-600/20 via-indigo-600/10 to-transparent p-6 border-b border-white/5">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-sky-500/10 rounded-xl text-sky-400 border border-sky-500/20 group-hover:scale-110 transition-transform duration-300">
             <Gamepad2 size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-lg text-white">Steam Deck Companion</h3>
-            <p className="text-sm text-[#1a9fff]/80 font-medium">Оптимизация и настройки консоли</p>
+            <h3 className="font-bold text-xl text-white tracking-tight">Steam Deck Companion</h3>
+            <p className="text-sm text-sky-400/80 font-bold uppercase tracking-widest mt-0.5">Performance Vault</p>
           </div>
         </div>
       </div>
 
-      <div className="p-5 space-y-6">
+      <div className="p-6 space-y-8">
         {/* Status Selection */}
-        <div className="space-y-3">
-          <label className="text-sm font-semibold text-slate-300">Совместимость с Deck</label>
+        <div className="space-y-4">
+          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Deck Compatibility</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {statuses.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setCurrentStatus(s.id as SteamDeckStatus)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl border transition-all ${
-                  currentStatus === s.id ? s.activeBg : s.bg
+                className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-300 ${
+                  currentStatus === s.id 
+                    ? s.activeBg + ' scale-105' 
+                    : s.bg + ' grayscale-[0.5] hover:grayscale-0'
                 }`}
               >
                 <s.icon className={s.color} size={24} />
-                <span className="text-xs font-bold text-slate-200">{s.label}</span>
+                <span className="text-[10px] font-black text-slate-200 uppercase tracking-wider">{s.label}</span>
               </button>
             ))}
           </div>
         </div>
 
         {/* Custom Settings Config */}
-        <div className="space-y-3">
-          <label className="flex items-center gap-2 text-sm font-semibold text-slate-300">
-            <Settings2 size={16} className="text-slate-400" />
-            Лучшие настройки (TDP, Proton, FSR)
+        <div className="space-y-4">
+          <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+            <Settings2 size={16} className="text-sky-400" />
+            Vibe Config (TDP, Proton, FSR)
           </label>
-          <textarea
-            value={currentSettings}
-            onChange={(e) => setCurrentSettings(e.target.value)}
-            placeholder="Например: Proton GE 8-3, TDP Limit 10W, 40 FPS / 40 Hz, FSR включен на 3 резкость..."
-            className="w-full h-32 bg-slate-950/80 border border-slate-700 p-4 text-slate-300 placeholder-slate-600 rounded-xl focus:outline-none focus:border-[#1a9fff] focus:ring-1 focus:ring-[#1a9fff] transition-all resize-none shadow-inner"
-          />
+          <div className="relative">
+            <textarea
+              value={currentSettings}
+              onChange={(e) => setCurrentSettings(e.target.value)}
+              placeholder="e.g. Proton GE 8-3, TDP Limit 10W, 40 FPS / 40 Hz..."
+              className="w-full h-32 bg-slate-950/50 border border-white/5 p-4 text-slate-200 placeholder-slate-600 rounded-2xl focus:outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/20 transition-all resize-none shadow-inner font-mono text-sm"
+            />
+            <div className="absolute bottom-3 right-3 opacity-20 pointer-events-none font-black text-sky-500 text-[10px]">CONFIG_FILE_v1</div>
+          </div>
         </div>
       </div>
 
       {/* Save Footer */}
-      <div className="px-5 py-4 bg-slate-800/50 border-t border-slate-700/50 flex justify-end">
+      <div className="px-6 py-4 bg-slate-950/40 border-t border-white/5 flex justify-end">
         <button
           onClick={handleSave}
           disabled={!hasChanges || isSaving}
-          className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold transition-all ${
+          className={`flex items-center gap-3 px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all ${
             isSaved
-              ? 'bg-emerald-600 text-white'
+              ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
               : isSaving
-              ? 'bg-slate-700 text-slate-400'
+              ? 'bg-slate-800 text-slate-500'
               : hasChanges
-              ? 'bg-[#1a9fff] hover:bg-[#118ae0] text-white shadow-lg shadow-[#1a9fff]/20 active:scale-95'
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+              ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-xl shadow-sky-900/40 active:scale-95'
+              : 'bg-slate-900 text-slate-600 cursor-not-allowed border border-white/5'
           }`}
         >
           {isSaving ? (
-            <><Loader size={18} className="animate-spin" /> Сохранение...</>
+            <><Loader size={16} className="animate-spin" /> syncing...</>
           ) : isSaved ? (
-            <><CheckCircle2 size={18} /> Сохранено!</>
+            <><CheckCircle2 size={16} /> saved to cloud</>
           ) : (
-            <><Save size={18} /> Сохранить настройки</>
+            <><Save size={16} /> apply settings</>
           )}
         </button>
       </div>

@@ -5,7 +5,7 @@ import { SearchBar, SearchResults } from '@/components';
 import { searchGames, RawgGame, getGameDetails } from '@/lib/rawg';
 import { addGame, checkAchievements } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AddGamePage() {
@@ -35,11 +35,9 @@ export default function AddGamePage() {
       const coverUrl = game.background_image || '/placeholder-game.jpg';
       const genres = game.genres?.map(g => g.name).join(', ') || '';
 
-      // Fetch detailed game info to get logo
       let logoUrl: string | undefined;
       try {
         const gameDetails = await getGameDetails(game.id);
-        // Try multiple possible logo fields from RAWG API
         if (gameDetails?.logo) {
           logoUrl = gameDetails.logo;
         } else if (gameDetails?.image_background) {
@@ -47,7 +45,6 @@ export default function AddGamePage() {
         } else {
           logoUrl = game.background_image;
         }
-        console.log('Game details:', { id: game.id, logo: gameDetails?.logo, image_background: gameDetails?.image_background });
       } catch (error) {
         console.warn('Failed to fetch game logo:', error);
         logoUrl = game.background_image;
@@ -65,17 +62,11 @@ export default function AddGamePage() {
       });
 
       if (result) {
-        // Check and unlock achievements
         try {
-          const unlockedIds = await checkAchievements('test_user');
-          if (unlockedIds.length > 0) {
-            console.log('Achievements unlocked:', unlockedIds);
-          }
+          await checkAchievements('test_user');
         } catch (error) {
           console.error('Error checking achievements:', error);
         }
-
-        // Show success message and redirect
         router.push(`/games/${result.id}`);
       }
     } catch (error) {
@@ -85,58 +76,74 @@ export default function AddGamePage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="relative min-h-screen bg-slate-950 font-sans selection:bg-violet-500/30">
+      {/* Background ambient glow effect */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-indigo-600/10 blur-[150px] rounded-full pointer-events-none" />
+      <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-fuchsia-600/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
         {/* Header */}
         <div className="mb-12">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-violet-400 transition-colors mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900/50 hover:bg-slate-800 border border-white/5 rounded-xl text-slate-400 hover:text-white transition-all mb-8 shadow-lg backdrop-blur-xl group"
           >
-            <ArrowLeft size={18} />
-            Back to Library
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-semibold text-sm">Return to Vault</span>
           </Link>
 
-          <h1 className="text-4xl sm:text-5xl font-bold text-white">
-            Add a Game
-          </h1>
-          <p className="mt-4 text-lg text-slate-400">
-            Search for a game and add it to your diary
-          </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h1 className="text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-500 tracking-tight leading-tight">
+                Expand Your <br />Collection
+              </h1>
+              <p className="mt-4 text-lg text-slate-400 font-medium max-w-lg">
+                Enter a title to discover and archive new digital experiences in your personal diary.
+              </p>
+            </div>
+            <div className="hidden lg:block p-6 bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-2xl shadow-2xl">
+              <PlusCircle size={48} className="text-violet-500 opacity-50" />
+            </div>
+          </div>
         </div>
 
         {/* Search Box */}
-        <div className="mb-8">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+        <div className="mb-12 relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl blur opacity-10 group-focus-within:opacity-25 transition duration-500" />
+          <div className="relative">
+            <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+          </div>
         </div>
 
-        {/* Info Section */}
-        {!hasSearched && (
-          <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-8 text-center">
-            <p className="text-slate-300 text-lg">
-              Search for a game above to get started
-            </p>
-          </div>
-        )}
-
         {/* Search Results */}
-        {hasSearched && (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-white">
-                Search Results
-              </h2>
-              <p className="text-slate-400 text-sm mt-1">
-                {searchResults.length} game{searchResults.length !== 1 ? 's' : ''} found
+        <div className="space-y-8">
+          {!hasSearched ? (
+            <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-16 text-center shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+              <Search size={64} className="mx-auto text-slate-800 group-hover:text-violet-500/20 transition-colors duration-700 mb-6" />
+              <h3 className="text-xl font-bold text-slate-400 tracking-widest uppercase mb-2">Ready for discovery?</h3>
+              <p className="text-slate-500 font-medium max-w-xs mx-auto">
+                Our database connects directly with RAWG to fetch cover arts and metadata.
               </p>
             </div>
-            <SearchResults
-              games={searchResults}
-              isLoading={isLoading}
-              onAddGame={handleAddGame}
-            />
-          </div>
-        )}
+          ) : (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                <h2 className="text-2xl font-black text-white tracking-tight">
+                  Discovered Items
+                </h2>
+                <span className="px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-lg text-violet-400 text-xs font-black uppercase tracking-widest group">
+                  {searchResults.length} Results
+                </span>
+              </div>
+              <SearchResults
+                games={searchResults}
+                isLoading={isLoading}
+                onAddGame={handleAddGame}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
