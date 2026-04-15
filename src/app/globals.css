@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Slate grayscale */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  /* Violet accent */
+  --color-violet-400: #c084fc;
+  --color-violet-500: #a855f7;
+  --color-violet-600: #9333ea;
+  --color-violet-700: #7e22ce;
+}
+
+* {
+  @apply border-slate-800;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100;
+}
+
+/* Smooth animations */
+@layer components {
+  .transition-smooth {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .text-glow {
+    @apply text-violet-400 drop-shadow-lg;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition-colors;
+  }
+
+  /* 3D Perspective */
+  .perspective {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  /* 3D Card Animations */
+  @keyframes float-up {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .float-animation {
+    animation: float-up 3s ease-in-out infinite;
+  }
+
+  /* Smooth scale animation */
+  @keyframes smooth-scale {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  .smooth-scale {
+    animation: smooth-scale 2s ease-in-out infinite;
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @keyframes slide-in-from-top {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .slide-in-from-top-2 {
+    animation: slide-in-from-top 0.3s ease-out;
+  }
+}
+
