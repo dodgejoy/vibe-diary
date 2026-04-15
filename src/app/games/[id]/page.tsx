@@ -164,20 +164,23 @@ export default function GameDetailPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen bg-slate-950 font-sans selection:bg-violet-500/30">
+      {/* Background ambient glow effect */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-violet-600/15 blur-[150px] rounded-full pointer-events-none" />
+
       {/* Cinematic Background Banner */}
       {(game.cover_url || screenshots[0]?.image || gameDetails?.background_image) && (
-        <div className="absolute top-0 left-0 w-full h-[70vh] z-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-[80vh] z-0 pointer-events-none overflow-hidden">
           <Image
             src={gameDetails?.background_image || screenshots[0]?.image || game.cover_url!}
             alt={game.title}
             fill
-            className="object-cover object-top opacity-60"
+            className="object-cover object-top opacity-20 mix-blend-screen scale-105"
             priority
           />
           {/* Subtle vignette and fade to background color */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/60 to-slate-950" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/80 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/40 to-slate-950/90" />
         </div>
       )}
 
@@ -187,10 +190,10 @@ export default function GameDetailPage() {
           {/* Back Button */}
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-slate-300 hover:text-violet-400 transition-colors mb-8"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900/50 hover:bg-slate-800 border border-white/5 rounded-xl text-slate-300 hover:text-white transition-all mb-10 shadow-lg backdrop-blur-xl group"
           >
-            <ArrowLeft size={18} />
-            Back to Library
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back to Library</span>
           </Link>
 
           {/* Main Grid */}
@@ -217,24 +220,24 @@ export default function GameDetailPage() {
                         src={game.logo_url} 
                         alt={`${game.title} logo`} 
                         fill 
-                        className="object-contain object-left drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]"
+                        className="object-contain object-left drop-shadow-[0_4px_12px_rgba(255,255,255,0.15)]"
                         priority
                       />
                     </div>
                   )}
-                  <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white drop-shadow-2xl tracking-tighter">
+                  <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-slate-400 drop-shadow-2xl tracking-tight leading-tight">
                     {game.title}
                   </h1>
                 </div>
                 {game.genres && (
-                  <p className="text-lg sm:text-xl text-slate-300 font-medium drop-shadow-md">
+                  <p className="inline-flex px-4 py-1.5 bg-violet-900/30 border border-violet-500/20 text-violet-300 font-bold uppercase tracking-widest text-sm rounded-lg backdrop-blur-md">
                     {game.genres}
                   </p>
                 )}
               </div>
 
               {/* Status Selector Card */}
-              <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+              <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <StatusSelector
                   value={game.status}
                   onChange={handleStatusChange}
@@ -245,24 +248,28 @@ export default function GameDetailPage() {
               {game.status === 'Completed' && (
                 <button
                   onClick={() => setIsRatingModalOpen(true)}
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold py-4 px-6 rounded-xl transition-all active:scale-95 flex items-center justify-between shadow-lg shadow-violet-900/20"
+                  className="w-full relative overflow-hidden group bg-slate-900/80 border border-white/10 hover:border-violet-500/50 text-white font-semibold py-5 px-6 rounded-2xl transition-all active:scale-95 flex items-center justify-between shadow-2xl"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">⭐</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity blur-xl" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-600/5 to-indigo-600/5" />
+                  <div className="relative z-10 flex items-center gap-5">
+                    <div className="p-3 bg-violet-500/20 rounded-xl group-hover:scale-110 group-hover:bg-violet-500/30 transition-all text-2xl border border-violet-500/20">
+                      <span className="drop-shadow-md">⭐</span>
+                    </div>
                     <div className="text-left">
-                      <div className="text-lg">Детальная оценка игры</div>
-                      <div className="text-sm font-normal text-violet-200 mt-0.5">
+                      <div className="text-xl font-bold tracking-tight">Детальная оценка игры</div>
+                      <div className="text-sm font-medium text-slate-400 mt-1">
                         {game.detailed_ratings
-                          ? 'Анализ по 7 критериям'
-                          : 'Нажми чтобы оценить'}
+                          ? 'Изменить оценку по 7 критериям'
+                          : 'Оценить по 7 уникальным критериям'}
                       </div>
                     </div>
                   </div>
                   {game.detailed_ratings && (
-                    <div className="text-right flex flex-col items-end">
-                      <div className="text-2xl font-black">
+                    <div className="relative z-10 text-right flex flex-col items-end">
+                      <div className="text-3xl font-black bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-all">
                         {((Object.values(game.detailed_ratings).reduce((a, b) => a + b, 0) / 90) * 10).toFixed(1)}
-                        <span className="text-sm text-violet-300 ml-1">/ 10</span>
+                        <span className="text-sm text-slate-500 ml-1">/ 10</span>
                       </div>
                     </div>
                   )}
@@ -279,7 +286,7 @@ export default function GameDetailPage() {
               </div>
 
               {/* Review Editor Card */}
-              <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+              <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">
                   Моя Рецензия / Заметки
                 </h3>
@@ -294,14 +301,14 @@ export default function GameDetailPage() {
 
               {/* Community Discussions */}
               {redditPosts.length > 0 && (
-                <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+                <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                   <CommunityDiscussions posts={redditPosts} />
                 </div>
               )}
 
               {/* Game Info Panel */}
               {gameDetails && (
-                <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+                <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                   <GameInfoPanel details={gameDetails} />
                 </div>
               )}
@@ -352,7 +359,7 @@ export default function GameDetailPage() {
                 <GameScratchpad gameId={game.id} />
 
                 {screenshots.length > 0 && (
-                  <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+                  <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                     <h3 className="text-lg font-semibold text-white mb-4">Скриншоты</h3>
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
                     {screenshots.slice(0, 8).map((screenshot, idx) => (
@@ -387,7 +394,7 @@ export default function GameDetailPage() {
           {/* Similar Games Section */}
           {similarGames.length > 0 && (
             <div className="mt-16 pt-8 border-t border-slate-700/50">
-              <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 shadow-xl">
+              <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <SimilarGames games={similarGames} />
               </div>
             </div>

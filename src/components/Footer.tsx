@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ExternalLink, Heart, Globe, MessageCircle, Gamepad2 } from 'lucide-react';
+import { ExternalLink, Heart, Globe, MessageCircle, Gamepad2, GitBranch, Sparkles } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -69,7 +69,7 @@ export function Footer() {
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               Powered By
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <a
                 href="https://rawg.io"
                 target="_blank"
@@ -94,6 +94,29 @@ export function Footer() {
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
               </a>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition-all"
+              >
+                <div className="flex flex-col">
+                  <span className="text-indigo-400 font-bold flex items-center gap-1.5">
+                    <GitBranch size={14} /> GitHub
+                  </span>
+                  <span className="text-xs text-slate-500 font-medium">Version Control</span>
+                </div>
+                <ExternalLink size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
+              </a>
+              <div className="group flex items-center justify-between p-3 bg-gradient-to-r from-violet-900/20 to-fuchsia-900/20 rounded-xl border border-violet-500/20 hover:border-violet-500/50 transition-all">
+                <div className="flex flex-col">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 font-black flex items-center gap-1.5 drop-shadow-md">
+                    <Sparkles size={14} className="text-fuchsia-400" /> Antigravity
+                  </span>
+                  <span className="text-[10px] uppercase font-bold text-violet-400/80 tracking-wider">AI Coding Assistant</span>
+                </div>
+                <Heart size={16} className="text-fuchsia-500/50 group-hover:text-fuchsia-500 group-hover:fill-fuchsia-500 transition-colors" />
+              </div>
             </div>
           </div>
         </div>
