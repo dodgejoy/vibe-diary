@@ -49,7 +49,7 @@ INSERT INTO public.achievements (slug, name, description, icon, category, trigge
 CREATE TABLE public.user_achievements (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   achievement_id uuid NOT NULL REFERENCES public.achievements(id) ON DELETE CASCADE,
-  user_id text NOT NULL, -- Will be filled when auth is implemented
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   unlocked_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
   progress integer DEFAULT 0, -- Progress towards achievement (0-100%)
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
@@ -65,7 +65,7 @@ CREATE INDEX idx_user_achievements_unlocked ON public.user_achievements(user_id,
 -- ============================================
 CREATE TABLE public.achievement_stats (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id text UNIQUE NOT NULL,
+  user_id uuid UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   total_achievements integer DEFAULT 0,
   total_reward_points integer DEFAULT 0,
   last_achieved_at timestamp with time zone,
@@ -75,6 +75,40 @@ CREATE TABLE public.achievement_stats (
 
 -- Index for quick user stats lookup
 CREATE INDEX idx_achievement_stats_user ON public.achievement_stats(user_id);
+
+ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.achievement_stats ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone authenticated can view achievements"
+ON public.achievements FOR SELECT
+USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Users can view own unlocked achievements"
+ON public.user_achievements FOR SELECT
+USING (user_id = auth.uid());
+
+CREATE POLICY "Users can insert own unlocked achievements"
+ON public.user_achievements FOR INSERT
+WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update own achievement progress"
+ON public.user_achievements FOR UPDATE
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can view own achievement stats"
+ON public.achievement_stats FOR SELECT
+USING (user_id = auth.uid());
+
+CREATE POLICY "Users can insert own achievement stats"
+ON public.achievement_stats FOR INSERT
+WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update own achievement stats"
+ON public.achievement_stats FOR UPDATE
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 -- ============================================
 -- MIGRATION SQL (Run if upgrading from v1.0)

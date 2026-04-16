@@ -9,6 +9,8 @@ export { StatusSelector } from './StatusSelector';
 export { DetailedRatingSelector } from './DetailedRatingSelector';
 export { Header } from './Header';
 export { Footer } from './Footer';
+export { AuthProvider, useAuth } from './AuthProvider';
+export { AuthGate } from './AuthGate';
 export { ScreenshotGallery } from './ScreenshotGallery';
 export { GameInfoPanel } from './GameInfoPanel';
 export { SimilarGames } from './SimilarGames';

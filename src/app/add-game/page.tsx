@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { SearchBar, SearchResults } from '@/components';
 import { searchGames, RawgGame, getGameDetails } from '@/lib/rawg';
 import { addGame, checkAchievements } from '@/lib/supabase';
+import { useAuth } from '@/components';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, PlusCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AddGamePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [searchResults, setSearchResults] = useState<RawgGame[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -62,10 +64,12 @@ export default function AddGamePage() {
       });
 
       if (result) {
-        try {
-          await checkAchievements('test_user');
-        } catch (error) {
-          console.error('Error checking achievements:', error);
+        if (user?.id) {
+          try {
+            await checkAchievements(user.id);
+          } catch (error) {
+            console.error('Error checking achievements:', error);
+          }
         }
         router.push(`/games/${result.id}`);
       }

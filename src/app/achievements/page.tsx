@@ -1,8 +1,11 @@
 'use client';
 
 import { AchievementsDisplay } from '@/components';
+import { useAuth } from '@/components';
 
 export default function AchievementsPage() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-900">
       <div className="max-w-5xl mx-auto px-4 py-12">
@@ -17,11 +20,13 @@ export default function AchievementsPage() {
         </div>
 
         {/* Achievements Display */}
-        <AchievementsDisplay
-          userId="test_user"
-          showStats={true}
-          compact={false}
-        />
+        {user && (
+          <AchievementsDisplay
+            userId={user.id}
+            showStats={true}
+            compact={false}
+          />
+        )}
 
         {/* Info Section */}
         <div className="mt-12 p-6 bg-slate-800/40 border border-slate-700/50 rounded-lg">

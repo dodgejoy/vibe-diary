@@ -1,16 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type User } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
 // Create a mock client if credentials are not available
 let supabase: any;
 
-if (supabaseUrl && supabaseKey) {
+if (isSupabaseConfigured) {
   supabase = createClient(supabaseUrl, supabaseKey);
 } else {
   // Return a mock client for build time
   supabase = {
+    auth: {
+      getUser: async () => ({ data: { user: null }, error: { message: 'Supabase not configured' } }),
+      getSession: async () => ({ data: { session: null }, error: { message: 'Supabase not configured' } }),
+      signInWithPassword: async () => ({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
+      signUp: async () => ({ data: { user: null, session: null }, error: { message: 'Supabase not configured' } }),
+      signOut: async () => ({ error: { message: 'Supabase not configured' } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => undefined } } }),
+    },
     from: () => ({
       select: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
       insert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
@@ -22,6 +31,171 @@ if (supabaseUrl && supabaseKey) {
 }
 
 export { supabase };
+
+export async function getCurrentUser(): Promise<User | null> {
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    console.error('Error fetching current user:', error);
+    return null;
+  }
+
+  return data.user ?? null;
+}
+
+export async function getCurrentUserId(): Promise<string | null> {
+  const user = await getCurrentUser();
+  return user?.id ?? null;
+}
+
+export async function signInWithEmail(email: string, password: string): Promise<{ error: string | null }> {
+  if (!isSupabaseConfigured) {
+    return { error: 'Supabase is not configured. Add your project URL and anon key first.' };
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  return { error: error?.message ?? null };
+}
+
+export async function signUpWithEmail(email: string, password: string): Promise<{ error: string | null; needsEmailConfirmation: boolean }> {
+  if (!isSupabaseConfigured) {
+    return {
+      error: 'Supabase is not configured. Add your project URL and anon key first.',
+      needsEmailConfirmation: false,
+    };
+  }
+
+  const { data, error } = await supabase.auth.signUp({ email, password });
+
+  return {
+    error: error?.message ?? null,
+    needsEmailConfirmation: !data.session,
+  };
+}
+
+export async function signOutCurrentUser(): Promise<{ error: string | null }> {
+  if (!isSupabaseConfigured) {
+    return { error: 'Supabase is not configured.' };
+  }
+
+  const { error } = await supabase.auth.signOut();
+  return { error: error?.message ?? null };
+}
+
+export type UserProfile = {
+  user_id: string;
+  email: string;
+  role: 'user' | 'admin';
+  created_at: string;
+  updated_at: string;
+};
+
+async function requireAdmin(): Promise<string> {
+  const userId = await requireUserId();
+  const profile = await fetchCurrentUserProfile(userId);
+
+  if (!profile || profile.role !== 'admin') {
+    throw new Error('Admin access is required for this action.');
+  }
+
+  return userId;
+}
+
+export async function fetchCurrentUserProfile(userId?: string): Promise<UserProfile | null> {
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
+  const resolvedUserId = userId ?? await getCurrentUserId();
+  if (!resolvedUserId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', resolvedUserId)
+    .single();
+
+  if (error) {
+    if (error.code !== 'PGRST116') {
+      console.error('Error fetching current user profile:', error);
+    }
+    return null;
+  }
+
+  return data;
+}
+
+export async function fetchAdminProfiles(): Promise<UserProfile[]> {
+  try {
+    await requireAdmin();
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching admin profiles:', error);
+    return [];
+  }
+}
+
+export async function fetchAdminGames(): Promise<Game[]> {
+  try {
+    await requireAdmin();
+
+    const { data, error } = await supabase
+      .from('games')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching admin games:', error);
+    return [];
+  }
+}
+
+export async function updateUserRole(targetUserId: string, role: UserProfile['role']): Promise<{ error: string | null }> {
+  try {
+    const currentUserId = await requireAdmin();
+
+    if (currentUserId === targetUserId && role !== 'admin') {
+      return { error: 'You cannot remove admin role from the currently signed-in admin account here.' };
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role, updated_at: new Date().toISOString() })
+      .eq('user_id', targetUserId);
+
+    if (error) {
+      throw error;
+    }
+
+    return { error: null };
+  } catch (error: any) {
+    console.error('Error updating user role:', error);
+    return { error: error?.message ?? 'Failed to update user role.' };
+  }
+}
+
+async function requireUserId(): Promise<string> {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    throw new Error('You must be signed in to access this data.');
+  }
+
+  return userId;
+}
 
 export type DetailedRatings = {
   gameplay: number;      // 0-20
@@ -35,6 +209,7 @@ export type DetailedRatings = {
 
 export type Game = {
   id: string;
+  user_id?: string;
   title: string;
   cover_url?: string;
   logo_url?: string;
@@ -57,9 +232,12 @@ export type Game = {
 // Fetch all games
 export async function fetchGames(): Promise<Game[]> {
   try {
+    const userId = await requireUserId();
+
     const { data, error } = await supabase
       .from('games')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -73,10 +251,13 @@ export async function fetchGames(): Promise<Game[]> {
 // Fetch a single game by ID
 export async function fetchGameById(id: string): Promise<Game | null> {
   try {
+    const userId = await requireUserId();
+
     const { data, error } = await supabase
       .from('games')
       .select('*')
       .eq('id', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
@@ -88,11 +269,13 @@ export async function fetchGameById(id: string): Promise<Game | null> {
 }
 
 // Add a new game
-export async function addGame(game: Omit<Game, 'id' | 'created_at' | 'updated_at'>): Promise<Game | null> {
+export async function addGame(game: Omit<Game, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<Game | null> {
   try {
+    const userId = await requireUserId();
+
     const { data, error } = await supabase
       .from('games')
-      .insert([game])
+      .insert([{ ...game, user_id: userId }])
       .select()
       .single();
 
@@ -107,10 +290,13 @@ export async function addGame(game: Omit<Game, 'id' | 'created_at' | 'updated_at
 // Update a game
 export async function updateGame(id: string, updates: Partial<Game>): Promise<Game | null> {
   try {
+    const userId = await requireUserId();
+
     const { data, error } = await supabase
       .from('games')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
+      .eq('user_id', userId)
       .select()
       .single();
 
@@ -125,10 +311,13 @@ export async function updateGame(id: string, updates: Partial<Game>): Promise<Ga
 // Delete a game
 export async function deleteGame(id: string): Promise<boolean> {
   try {
+    const userId = await requireUserId();
+
     const { error } = await supabase
       .from('games')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', userId);
 
     if (error) throw error;
     return true;
@@ -176,6 +365,10 @@ export type AchievementStats = {
   updated_at: string;
 };
 
+export type AdminUserAchievement = UserAchievement & {
+  achievement?: Achievement | null;
+};
+
 // Fetch all available achievements
 export async function fetchAchievements(): Promise<Achievement[]> {
   try {
@@ -189,6 +382,57 @@ export async function fetchAchievements(): Promise<Achievement[]> {
   } catch (error) {
     console.error('Error fetching achievements:', error);
     return [];
+  }
+}
+
+export async function fetchAdminAchievementStats(): Promise<AchievementStats[]> {
+  try {
+    await requireAdmin();
+
+    const { data, error } = await supabase
+      .from('achievement_stats')
+      .select('*')
+      .order('total_reward_points', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching admin achievement stats:', error);
+    return [];
+  }
+}
+
+export async function fetchAdminUserAchievements(): Promise<AdminUserAchievement[]> {
+  try {
+    await requireAdmin();
+
+    const { data, error } = await supabase
+      .from('user_achievements')
+      .select('*, achievement:achievements(*)')
+      .order('unlocked_at', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching admin user achievements:', error);
+    return [];
+  }
+}
+
+export async function deleteAnyGameAsAdmin(id: string): Promise<{ error: string | null }> {
+  try {
+    await requireAdmin();
+
+    const { error } = await supabase
+      .from('games')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error: any) {
+    console.error('Error deleting game as admin:', error);
+    return { error: error?.message ?? 'Failed to delete game.' };
   }
 }
 
@@ -369,7 +613,7 @@ export async function checkAchievements(userId: string): Promise<string[]> {
     const userAchievements = await fetchUserAchievements(userId);
 
     // Track which achievements have been unlocked
-    const unlockedAchievementSlugs = new Set(userAchievements.map(ua => ua.achievement_id));
+    const unlockedAchievementIdsSet = new Set(userAchievements.map(ua => ua.achievement_id));
 
     // Count games by status
     const gameCount = games.length;
@@ -379,7 +623,7 @@ export async function checkAchievements(userId: string): Promise<string[]> {
 
     // Check each achievement
     for (const achievement of achievements) {
-      if (unlockedAchievementSlugs.has(achievement.id)) {
+      if (unlockedAchievementIdsSet.has(achievement.id)) {
         continue; // Already unlocked
       }
 

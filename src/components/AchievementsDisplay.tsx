@@ -13,13 +13,13 @@ import {
 import { AchievementBadge, AchievementGrid } from './AchievementBadge';
 
 interface AchievementsDisplayProps {
-  userId?: string;
+  userId: string;
   showStats?: boolean;
   compact?: boolean;
 }
 
 export function AchievementsDisplay({
-  userId = 'test_user', // Default for development
+  userId,
   showStats = true,
   compact = false,
 }: AchievementsDisplayProps) {

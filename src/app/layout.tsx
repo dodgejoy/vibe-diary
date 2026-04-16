@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Header, Footer } from "@/components";
+import { Header, Footer, AuthProvider, AuthGate } from "@/components";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,11 +30,13 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
-        <Header />
-        <main className="flex-1 bg-gradient-to-b from-slate-950 to-slate-900">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="flex-1 bg-gradient-to-b from-slate-950 to-slate-900">
+            <AuthGate>{children}</AuthGate>
+          </main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
