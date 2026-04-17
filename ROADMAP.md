@@ -304,7 +304,7 @@ npm install --save-dev @playwright/test
 ## [1.1.0] - 2024-XX-XX
 
 ### Added
-- React Query integration for caching
+- React Query integration for cachingg
 - Image optimization with WebP
 - Skeleton loaders for loading states
 - Toast notifications for feedback
