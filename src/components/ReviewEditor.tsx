@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Save, Loader, Plus, X, ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface ReviewEditorProps {
   initialTitle?: string;
@@ -27,6 +28,7 @@ export function ReviewEditor({
 
   const [newPro, setNewPro] = useState('');
   const [newCon, setNewCon] = useState('');
+  const { t } = useTranslation();
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
@@ -72,12 +74,12 @@ export function ReviewEditor({
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-slate-400 mb-2">Заголовок рецензии</label>
+        <label className="block text-sm font-medium text-slate-400 mb-2">{t('reviewEditor.titleLabel')}</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Например: Отличная игра, но с плохой оптимизацией..."
+          placeholder={t('reviewEditor.titlePlaceholder')}
           className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700/50 text-white placeholder-slate-500 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all font-medium text-lg shadow-inner"
         />
       </div>
@@ -88,7 +90,7 @@ export function ReviewEditor({
         <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-xl p-5 shadow-lg">
           <div className="flex items-center gap-2 mb-4 text-emerald-400 font-semibold">
             <ThumbsUp size={18} />
-            Плюсы
+            {t('reviewEditor.pros')}
           </div>
           <div className="space-y-3">
             {pros.map((pro, idx) => (
@@ -105,7 +107,7 @@ export function ReviewEditor({
                 value={newPro}
                 onChange={(e) => setNewPro(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, addPro)}
-                placeholder="Добавить плюс..."
+                placeholder={t('reviewEditor.addPro')}
                 className="flex-1 bg-slate-900/50 border border-slate-700/50 text-slate-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-emerald-500"
               />
               <button 
@@ -122,7 +124,7 @@ export function ReviewEditor({
         <div className="bg-rose-950/20 border border-rose-900/30 rounded-xl p-5 shadow-lg">
           <div className="flex items-center gap-2 mb-4 text-rose-400 font-semibold">
             <ThumbsDown size={18} />
-            Минусы
+            {t('reviewEditor.cons')}
           </div>
           <div className="space-y-3">
             {cons.map((con, idx) => (
@@ -139,7 +141,7 @@ export function ReviewEditor({
                 value={newCon}
                 onChange={(e) => setNewCon(e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e, addCon)}
-                placeholder="Добавить минус..."
+                placeholder={t('reviewEditor.addCon')}
                 className="flex-1 bg-slate-900/50 border border-slate-700/50 text-slate-200 px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-rose-500"
               />
               <button 
@@ -157,12 +159,12 @@ export function ReviewEditor({
       <div>
         <label className="flex items-center gap-2 text-sm font-medium text-slate-400 mb-2">
           <MessageSquare size={16} />
-          Развернутое мнение (необязательно)
+          {t('reviewEditor.notesLabel')}
         </label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Распиши свои мысли о сюжете, геймплее, и общем впечатлении..."
+          placeholder={t('reviewEditor.notesPlaceholder')}
           className="w-full h-48 px-4 py-4 bg-slate-900/50 border border-slate-700/50 text-slate-200 placeholder-slate-500 rounded-xl focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-all resize-none shadow-inner leading-relaxed"
         />
       </div>
@@ -181,17 +183,17 @@ export function ReviewEditor({
           {isSaving ? (
             <>
               <Loader size={18} className="animate-spin" />
-              Сохранение...
+              {t('reviewEditor.saving')}
             </>
           ) : isSaved ? (
             <>
               <Save size={18} />
-              Сохранено!
+              {t('reviewEditor.saved')}
             </>
           ) : (
             <>
               <Save size={18} />
-              Сохранить рецензию
+              {t('reviewEditor.saveReview')}
             </>
           )}
         </button>

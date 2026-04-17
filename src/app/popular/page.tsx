@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { PopularGame, fetchPopularGames } from '@/lib/supabase';
 import { Flame, Users, Star, TrendingUp, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n';
 
 export default function PopularPage() {
   const [games, setGames] = useState<PopularGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let cancelled = false;
@@ -38,7 +40,7 @@ export default function PopularPage() {
             className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-8 group"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            На главную
+            {t('common.toHome')}
           </Link>
 
           <div className="flex items-start gap-4 sm:gap-5">
@@ -47,10 +49,10 @@ export default function PopularPage() {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-                Популярное на <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Vibe Diary</span>
+                {t('popular.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">{t('popular.brandName')}</span>
               </h1>
               <p className="text-base sm:text-lg text-slate-400 mt-2 max-w-2xl">
-                Игры, которые чаще всего добавляют и оценивают пользователи. Открой для себя что-то новое или убедись, что твои фавориты тоже в топе.
+                {t('popular.subtitle')}
               </p>
             </div>
           </div>
@@ -60,7 +62,7 @@ export default function PopularPage() {
               <div className="flex items-center gap-2 px-4 py-2 bg-slate-900/50 border border-slate-800 rounded-xl">
                 <TrendingUp size={16} className="text-violet-400" />
                 <span className="text-sm font-bold text-white">{games.length}</span>
-                <span className="text-sm text-slate-400">игр в каталоге</span>
+                <span className="text-sm text-slate-400">{t('popular.gamesInCatalog')}</span>
               </div>
             </div>
           )}
@@ -85,9 +87,9 @@ export default function PopularPage() {
               <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-5 border-4 border-slate-900">
                 <Flame size={32} className="text-slate-600" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Пока ничего нет</h3>
+              <h3 className="text-xl font-bold text-white mb-2">{t('popular.nothingYet')}</h3>
               <p className="text-slate-400 max-w-md mx-auto">
-                Здесь появятся игры, когда пользователи начнут добавлять и оценивать их на Vibe Diary.
+                {t('popular.nothingYetDesc')}
               </p>
             </div>
           ) : (

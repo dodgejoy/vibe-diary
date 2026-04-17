@@ -265,10 +265,39 @@ export async function fetchPopularGames(limit = 12): Promise<PopularGame[]> {
   }
 }
 
-// Fetch all games
-export async function fetchGames(): Promise<Game[]> {
+// Community ratings for a specific game (aggregated across all users)
+export type CommunityRatings = {
+  rater_count: number;
+  avg_gameplay: number;
+  avg_visuals: number;
+  avg_atmosphere: number;
+  avg_sound: number;
+  avg_technical: number;
+  avg_content: number;
+  avg_impression: number;
+  avg_story: number;
+  has_story: boolean;
+};
+
+export async function fetchCommunityRatings(rawgId: number): Promise<CommunityRatings | null> {
+  if (!isSupabaseConfigured) return null;
+
   try {
-    const userId = await requireUserId();
+    const { data, error } = await supabase.rpc('get_community_ratings', { game_rawg_id: rawgId });
+    if (error) throw error;
+    const row = data?.[0];
+    if (!row || row.rater_count === 0) return null;
+    return row as CommunityRatings;
+  } catch (error) {
+    console.error('Error fetching community ratings:', error);
+    return null;
+  }
+}
+
+// Fetch all games
+export async function fetchGames(knownUserId?: string): Promise<Game[]> {
+  try {
+    const userId = knownUserId ?? await requireUserId();
 
     const { data, error } = await supabase
       .from('games')
@@ -285,9 +314,9 @@ export async function fetchGames(): Promise<Game[]> {
 }
 
 // Fetch a single game by ID
-export async function fetchGameById(id: string): Promise<Game | null> {
+export async function fetchGameById(id: string, knownUserId?: string): Promise<Game | null> {
   try {
-    const userId = await requireUserId();
+    const userId = knownUserId ?? await requireUserId();
 
     const { data, error } = await supabase
       .from('games')

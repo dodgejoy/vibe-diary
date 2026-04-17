@@ -1,12 +1,14 @@
 'use client';
 
 import { ClockIcon, PlayCircleIcon, CheckCircleIcon, XCircleIcon } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface StatusBadgeProps {
   status: string;
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
+  const { t } = useTranslation();
   const statusConfig = {
     'Not Started': {
       bg: 'bg-slate-600',
@@ -14,7 +16,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <ClockIcon size={14} />
       ),
-      label: 'Не начата',
+      label: t('status.notStarted'),
     },
     'Playing': {
       bg: 'bg-violet-600',
@@ -22,7 +24,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <PlayCircleIcon size={14} />
       ),
-      label: 'Играю',
+      label: t('status.playing'),
     },
     'Completed': {
       bg: 'bg-emerald-600',
@@ -30,7 +32,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <CheckCircleIcon size={14} />
       ),
-      label: 'Пройдена',
+      label: t('status.completed'),
     },
     'Abandoned': {
       bg: 'bg-red-600',
@@ -38,7 +40,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <XCircleIcon size={14} />
       ),
-      label: 'Заброшена',
+      label: t('status.abandoned'),
     },
   };
 

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { fetchGameById, updateGame, deleteGame, addGame, Game, DetailedRatings, getNormalizedScore } from '@/lib/supabase';
+import { fetchGameById, updateGame, deleteGame, addGame, fetchCommunityRatings, Game, DetailedRatings, CommunityRatings, getNormalizedScore } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import { StatusSelector } from '@/components';
 import { 
@@ -15,6 +15,7 @@ import {
   GameDetails 
 } from '@/lib/rawg';
 import { ArrowLeft, Trash2, Loader, Share2, Plus } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 // Dynamic imports for heavy components (code-split)
 const ReviewEditor = dynamic(() => import('@/components/ReviewEditor').then(m => ({ default: m.ReviewEditor })));
@@ -23,9 +24,9 @@ const ScreenshotGallery = dynamic(() => import('@/components/ScreenshotGallery')
 const GameInfoPanel = dynamic(() => import('@/components/GameInfoPanel').then(m => ({ default: m.GameInfoPanel })));
 const SimilarGames = dynamic(() => import('@/components/SimilarGames').then(m => ({ default: m.SimilarGames })));
 const CommunityDiscussions = dynamic(() => import('@/components/CommunityDiscussions').then(m => ({ default: m.CommunityDiscussions })));
-const GameScratchpad = dynamic(() => import('@/components/GameScratchpad').then(m => ({ default: m.GameScratchpad })));
 const SteamDeckCompanion = dynamic(() => import('@/components/SteamDeckCompanion').then(m => ({ default: m.SteamDeckCompanion })));
 const GameShareModal = dynamic(() => import('@/components/GameShareModal').then(m => ({ default: m.GameShareModal })));
+const CommunityRatingRadar = dynamic(() => import('@/components/CommunityRatingRadar').then(m => ({ default: m.CommunityRatingRadar })));
 
 export default function GameDetailPage() {
   const params = useParams();
@@ -46,6 +47,8 @@ export default function GameDetailPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [communityRatings, setCommunityRatings] = useState<CommunityRatings | null>(null);
+  const { t } = useTranslation();
 
   // Read-only mode: viewing by RAWG ID without owning the game
   const isReadOnly = isRawgId && !game?.id;
@@ -57,11 +60,14 @@ export default function GameDetailPage() {
         if (isRawgId) {
           // Numeric ID → load from RAWG API directly
           const rawgId = parseInt(gameId, 10);
-          const [details, shots, similar] = await Promise.all([
+          const [details, shots, similar, community] = await Promise.all([
             getGameDetails(rawgId),
             getGameScreenshots(rawgId),
             getSimilarGames(rawgId),
+            fetchCommunityRatings(rawgId),
           ]);
+
+          setCommunityRatings(community);
 
           if (details) {
             setGameDetails(details);
@@ -80,35 +86,37 @@ export default function GameDetailPage() {
               updated_at: '',
             });
           } else {
-            setError('Игра не найдена');
+            setError(t('gameDetail.gameNotFound'));
           }
         } else {
           // UUID → load from user's library
-          const data = await fetchGameById(gameId);
+          const data = await fetchGameById(gameId, user?.id);
           if (data) {
             setGame(data);
 
             if (data.rawg_id) {
               try {
-                const [details, shots, similar] = await Promise.all([
+                const [details, shots, similar, community] = await Promise.all([
                   getGameDetails(data.rawg_id),
                   getGameScreenshots(data.rawg_id),
                   getSimilarGames(data.rawg_id),
+                  fetchCommunityRatings(data.rawg_id),
                 ]);
 
                 setGameDetails(details || null);
                 setScreenshots(shots || []);
                 setSimilarGames(similar || []);
+                setCommunityRatings(community);
               } catch (rawgErr) {
                 console.warn('Failed to load RAWG data:', rawgErr);
               }
             }
           } else {
-            setError('Игра не найдена');
+            setError(t('gameDetail.gameNotFound'));
           }
         }
       } catch (err) {
-        setError('Не удалось загрузить игру');
+        setError(t('gameDetail.loadError'));
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -151,7 +159,7 @@ export default function GameDetailPage() {
   };
 
   const handleDeleteAsync = async () => {
-    if (!game || !confirm('Вы уверены, что хотите удалить эту игру из дневника?')) return;
+    if (!game || !confirm(t('gameDetail.deleteConfirm'))) return;
 
     setIsDeleting(true);
     try {
@@ -159,7 +167,7 @@ export default function GameDetailPage() {
       if (success) {
         router.push('/');
       } else {
-        alert('Не удалось удалить игру');
+        alert(t('gameDetail.deleteError'));
       }
     } finally {
       setIsDeleting(false);
@@ -195,7 +203,7 @@ export default function GameDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader className="animate-spin text-violet-500" size={32} />
-          <p className="text-slate-300">Загрузка данных об игре...</p>
+          <p className="text-slate-300">{t('gameDetail.loadingGame')}</p>
         </div>
       </div>
     );
@@ -210,11 +218,11 @@ export default function GameDetailPage() {
             className="inline-flex items-center gap-2 text-slate-400 hover:text-violet-400 transition-colors mb-6"
           >
             <ArrowLeft size={18} />
-            Назад в библиотеку
+            {t('gameDetail.backToLibrary')}
           </Link>
           <div className="bg-red-900/20 border border-red-500/30 text-red-300 p-6 rounded-lg">
-            <p className="font-medium">Ошибка</p>
-            <p className="text-sm mt-2">{error || 'Игра не найдена'}</p>
+            <p className="font-medium">{t('common.error')}</p>
+            <p className="text-sm mt-2">{error || t('gameDetail.gameNotFound')}</p>
           </div>
         </div>
       </div>
@@ -256,7 +264,7 @@ export default function GameDetailPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900/50 hover:bg-slate-800 border border-white/5 rounded-xl text-slate-300 hover:text-white transition-all shadow-lg backdrop-blur-xl group"
             >
               <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-              <span className="font-medium">{isRawgId ? 'Назад' : 'Назад в библиотеку'}</span>
+              <span className="font-medium">{isRawgId ? t('common.back') : t('gameDetail.backToLibrary')}</span>
             </Link>
 
             <div className="flex items-center gap-3">
@@ -271,7 +279,7 @@ export default function GameDetailPage() {
                   ) : (
                     <Plus size={18} className="group-hover:rotate-90 transition-transform" />
                   )}
-                  <span>{isAdding ? 'Добавление...' : 'В мою библиотеку'}</span>
+                  <span>{isAdding ? t('gameDetail.adding') : t('gameDetail.addToLibrary')}</span>
                 </button>
               )}
 
@@ -281,7 +289,7 @@ export default function GameDetailPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 border border-violet-400/20 rounded-xl text-white font-bold transition-all shadow-lg shadow-violet-900/40 group active:scale-95"
                 >
                   <Plus size={18} />
-                  <span>Войти и добавить</span>
+                  <span>{t('gameDetail.signInAndAdd')}</span>
                 </Link>
               )}
 
@@ -291,7 +299,7 @@ export default function GameDetailPage() {
                   className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 border border-violet-400/20 rounded-xl text-white font-bold transition-all shadow-lg shadow-violet-900/40 group active:scale-95"
                 >
                   <Share2 size={18} className="group-hover:rotate-12 transition-transform" />
-                  <span>Поделиться</span>
+                  <span>{t('gameDetail.share')}</span>
                 </button>
               )}
             </div>
@@ -349,11 +357,11 @@ export default function GameDetailPage() {
                       <span className="drop-shadow-md">⭐</span>
                     </div>
                     <div className="text-left">
-                      <div className="text-xl font-bold tracking-tight">Детальная оценка игры</div>
+                      <div className="text-xl font-bold tracking-tight">{t('gameDetail.detailedRating')}</div>
                       <div className="text-sm font-medium text-slate-400 mt-1">
                         {game.detailed_ratings
-                          ? `Изменить оценку по ${Object.keys(game.detailed_ratings).length} критериям`
-                          : 'Оценить по уникальным критериям'}
+                          ? t('gameDetail.changeRating', { count: String(Object.keys(game.detailed_ratings).length) })
+                          : t('gameDetail.rateByCategories')}
                       </div>
                     </div>
                   </div>
@@ -366,6 +374,13 @@ export default function GameDetailPage() {
                     </div>
                   )}
                 </button>
+              )}
+
+              {/* Community Rating Radar */}
+              {communityRatings && (
+                <div className="mt-8">
+                  <CommunityRatingRadar ratings={communityRatings} />
+                </div>
               )}
 
               {/* Steam Deck Companion */}
@@ -383,7 +398,7 @@ export default function GameDetailPage() {
               {!isReadOnly && (
               <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">
-                  Моя Рецензия / Заметки
+                  {t('gameDetail.myReview')}
                 </h3>
                 <ReviewEditor
                   initialTitle={game.review_title}
@@ -419,12 +434,12 @@ export default function GameDetailPage() {
                 {isDeleting ? (
                   <>
                     <Loader size={16} className="animate-spin" />
-                    Удаление...
+                    {t('common.deleting')}
                   </>
                 ) : (
                   <>
                     <Trash2 size={16} />
-                    Удалить из дневника
+                    {t('gameDetail.removeFromDiary')}
                   </>
                 )}
               </button>
@@ -434,14 +449,14 @@ export default function GameDetailPage() {
               {!isReadOnly && (
               <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-6 text-sm text-slate-300 shadow-xl">
                 <p>
-                  Добавлена в дневник{' '}
+                  {t('gameDetail.addedToDiary')}{' '}
                   <span className="text-slate-200 font-medium">
                     {new Date(game.created_at).toLocaleDateString()}
                   </span>
                 </p>
                 {game.updated_at !== game.created_at && (
                   <p className="mt-2">
-                    Последнее обновление{' '}
+                    {t('gameDetail.lastUpdated')}{' '}
                     <span className="text-slate-200 font-medium">
                       {new Date(game.updated_at).toLocaleDateString()}
                     </span>
@@ -451,16 +466,13 @@ export default function GameDetailPage() {
               )}
             </div>
 
-            {/* Right Column - Scratchpad & Screenshots */}
+            {/* Right Column - Screenshots */}
             <div className="lg:col-span-1 space-y-6">
               <div className="sticky top-8 space-y-6">
-                
-                {/* Always show scratchpad */}
-                {!isReadOnly && <GameScratchpad gameId={game.id} />}
 
                 {screenshots.length > 0 && (
                   <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
-                    <h3 className="text-lg font-semibold text-white mb-4">Скриншоты</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">{t('gameDetail.screenshots')}</h3>
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
                     {screenshots.slice(0, 8).map((screenshot, idx) => (
                       <div

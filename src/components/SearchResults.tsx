@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { RawgGame } from '@/lib/rawg';
 import { Plus, Loader } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from '@/i18n';
 
 interface SearchResultsProps {
   games: RawgGame[];
@@ -14,6 +15,7 @@ interface SearchResultsProps {
 export function SearchResults({ games, isLoading = false, onAddGame }: SearchResultsProps) {
   const [addingId, setAddingId] = useState<number | null>(null);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  const { t } = useTranslation();
 
   const handleAddGame = async (game: RawgGame) => {
     if (!onAddGame) return;
@@ -32,7 +34,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
       <div className="flex justify-center items-center min-h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader className="animate-spin text-violet-500" size={32} />
-          <p className="text-slate-300">Поиск игр...</p>
+          <p className="text-slate-300">{t('searchResults.searching')}</p>
         </div>
       </div>
     );
@@ -41,7 +43,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-400">Игры не найдены. Попробуйте другой запрос.</p>
+        <p className="text-slate-400">{t('searchResults.noResults')}</p>
       </div>
     );
   }
@@ -78,7 +80,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
                 </h3>
                 {game.released && (
                   <p className="text-sm text-slate-400">
-                    Вышла: {new Date(game.released).getFullYear()}
+                    {t('searchResults.released')} {new Date(game.released).getFullYear()}
                   </p>
                 )}
                 {game.genres && game.genres.length > 0 && (
@@ -115,7 +117,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
                   <Plus size={16} />
                 )}
                 <span className="hidden sm:inline text-sm">
-                  {isAdded ? 'Добавлено' : 'Добавить'}
+                  {isAdded ? t('searchResults.added') : t('searchResults.add')}
                 </span>
               </button>
             </div>

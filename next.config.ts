@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
+import packageJson from "./package.json";
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: packageJson.version,
+  },
   images: {
     remotePatterns: [
       {
@@ -37,6 +41,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  headers: async () => [
+    {
+      source: "/:path*(svg|jpg|jpeg|png|webp|avif|ico|woff|woff2)",
+      headers: [
+        { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;

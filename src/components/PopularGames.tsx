@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { PopularGame, fetchPopularGames } from '@/lib/supabase';
 import { Flame, Users, Star, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n';
 
 export function PopularGames() {
   const [games, setGames] = useState<PopularGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let cancelled = false;
@@ -34,15 +36,15 @@ export function PopularGames() {
               <Flame size={24} className="text-orange-400" />
             </span>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">Популярное на Vibe Diary</h2>
-              <p className="text-sm text-slate-400 mt-0.5">Игры, которые чаще всего добавляют и оценивают</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white">{t('popular.heading')}</h2>
+              <p className="text-sm text-slate-400 mt-0.5">{t('popular.headingSubtitle')}</p>
             </div>
           </div>
           <Link
             href="/popular"
             className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-slate-300 hover:text-white font-semibold rounded-xl transition-all group"
           >
-            <span className="text-sm">Смотреть все</span>
+            <span className="text-sm">{t('common.viewAll')}</span>
             <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
@@ -72,7 +74,7 @@ export function PopularGames() {
               href="/popular"
               className="inline-flex items-center gap-2 px-5 py-3 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-white font-semibold rounded-xl transition-all"
             >
-              Смотреть все
+              {t('common.viewAll')}
               <ArrowRight size={16} />
             </Link>
           </div>

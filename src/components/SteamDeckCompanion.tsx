@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Gamepad2, Settings2, CheckCircle2, AlertCircle, XCircle, HelpCircle, Save, Loader } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 type SteamDeckStatus = 'verified' | 'playable' | 'unsupported' | 'unknown';
 
@@ -16,12 +17,13 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
   const [currentSettings, setCurrentSettings] = useState(settings || '');
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const { t } = useTranslation();
 
   const statuses = [
-    { id: 'verified', label: 'Проверено', icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20', activeBg: 'bg-emerald-500/30 border-emerald-500/50 ring-1 ring-emerald-500' },
-    { id: 'playable', label: 'Играбельно', icon: AlertCircle, color: 'text-yellow-500', bg: 'bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20', activeBg: 'bg-yellow-500/30 border-yellow-500/50 ring-1 ring-yellow-500' },
-    { id: 'unsupported', label: 'Не поддерживается', icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20', activeBg: 'bg-rose-500/30 border-rose-500/50 ring-1 ring-rose-500' },
-    { id: 'unknown', label: 'Неизвестно', icon: HelpCircle, color: 'text-slate-400', bg: 'bg-slate-800 border-slate-700 hover:bg-slate-700', activeBg: 'bg-slate-700 border-slate-500 ring-1 ring-slate-400' },
+    { id: 'verified', label: t('steamDeck.verified'), icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20', activeBg: 'bg-emerald-500/30 border-emerald-500/50 ring-1 ring-emerald-500' },
+    { id: 'playable', label: t('steamDeck.playable'), icon: AlertCircle, color: 'text-yellow-500', bg: 'bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20', activeBg: 'bg-yellow-500/30 border-yellow-500/50 ring-1 ring-yellow-500' },
+    { id: 'unsupported', label: t('steamDeck.unsupported'), icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20', activeBg: 'bg-rose-500/30 border-rose-500/50 ring-1 ring-rose-500' },
+    { id: 'unknown', label: t('steamDeck.unknown'), icon: HelpCircle, color: 'text-slate-400', bg: 'bg-slate-800 border-slate-700 hover:bg-slate-700', activeBg: 'bg-slate-700 border-slate-500 ring-1 ring-slate-400' },
   ];
 
   const handleSave = useCallback(async () => {
@@ -46,8 +48,8 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
             <Gamepad2 size={24} />
           </div>
           <div>
-            <h3 className="font-bold text-xl text-white tracking-tight">Компаньон Steam Deck</h3>
-            <p className="text-sm text-sky-400/80 font-bold uppercase tracking-widest mt-0.5">Хранилище настроек</p>
+            <h3 className="font-bold text-xl text-white tracking-tight">{t('steamDeck.title')}</h3>
+            <p className="text-sm text-sky-400/80 font-bold uppercase tracking-widest mt-0.5">{t('steamDeck.settingsVault')}</p>
           </div>
         </div>
       </div>
@@ -55,7 +57,7 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
       <div className="p-6 space-y-8">
         {/* Status Selection */}
         <div className="space-y-4">
-          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Совместимость с Deck</label>
+          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{t('steamDeck.deckCompatibility')}</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {statuses.map((s) => (
               <button
@@ -78,13 +80,13 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
         <div className="space-y-4">
           <label className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
             <Settings2 size={16} className="text-sky-400" />
-            Настройки (TDP, Proton, FSR)
+            {t('steamDeck.settingsLabel')}
           </label>
           <div className="relative">
             <textarea
               value={currentSettings}
               onChange={(e) => setCurrentSettings(e.target.value)}
-              placeholder="напр. Proton GE 8-3, TDP Limit 10W, 40 FPS / 40 Hz..."
+              placeholder={t('steamDeck.settingsPlaceholder')}
               className="w-full h-32 bg-slate-950/50 border border-white/5 p-4 text-slate-200 placeholder-slate-600 rounded-2xl focus:outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/20 transition-all resize-none shadow-inner font-mono text-sm"
             />
             <div className="absolute bottom-3 right-3 opacity-20 pointer-events-none font-black text-sky-500 text-[10px]">CONFIG_FILE_v1</div>
@@ -108,11 +110,11 @@ export function SteamDeckCompanion({ status = 'unknown', settings = '', onSave }
           }`}
         >
           {isSaving ? (
-            <><Loader size={16} className="animate-spin" /> синхронизация...</>
+            <><Loader size={16} className="animate-spin" /> {t('steamDeck.syncing')}</>
           ) : isSaved ? (
-            <><CheckCircle2 size={16} /> сохранено в облако</>
+            <><CheckCircle2 size={16} /> {t('steamDeck.savedToCloud')}</>
           ) : (
-            <><Save size={16} /> применить настройки</>
+            <><Save size={16} /> {t('steamDeck.applySettings')}</>
           )}
         </button>
       </div>

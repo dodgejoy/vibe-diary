@@ -5,16 +5,18 @@ import { usePathname } from 'next/navigation';
 import { Gamepad2, Plus, Home, LogOut, UserCircle2, Shield, Flame } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from './AuthProvider';
+import { useTranslation } from '@/i18n';
 
 export function Header() {
   const pathname = usePathname();
   const { user, profile, isAdmin, isLoading, signOut } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const { t } = useTranslation();
 
   const navItems = [
-    { name: 'Библиотека', path: '/', icon: Home },
-    { name: 'Популярное', path: '/popular', icon: Flame },
-    ...(isAdmin ? [{ name: 'Админ', path: '/admin', icon: Shield }] : []),
+    { name: t('header.library'), path: '/', icon: Home },
+    { name: t('header.popular'), path: '/popular', icon: Flame },
+    ...(isAdmin ? [{ name: t('header.admin'), path: '/admin', icon: Shield }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -43,7 +45,7 @@ export function Header() {
               VIBE DIARY
             </span>
             <span className="text-[10px] font-bold tracking-[0.2em] text-violet-400 uppercase -mt-1">
-              Личное Хранилище
+              {t('header.subtitle')}
             </span>
           </div>
         </Link>
@@ -78,7 +80,7 @@ export function Header() {
               className="group relative flex items-center gap-2 px-5 py-2.5 bg-white text-slate-950 font-bold rounded-xl transition-all duration-300 hover:scale-105 hover:bg-slate-100 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
             >
               <UserCircle2 size={20} strokeWidth={2.5} className="text-violet-600" />
-              <span>Войти</span>
+              <span>{t('common.signIn')}</span>
             </Link>
           )}
 
@@ -100,7 +102,7 @@ export function Header() {
               >
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-400 to-fuchsia-400 opacity-0 group-hover:opacity-20 transition-opacity blur-md" />
                 <Plus size={20} strokeWidth={3} className="text-violet-600" />
-                <span className="hidden sm:inline">Добавить игру</span>
+                <span className="hidden sm:inline">{t('common.addGame')}</span>
               </Link>
 
               <button
@@ -109,7 +111,7 @@ export function Header() {
                 className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-xl transition-all disabled:opacity-60"
               >
                 <LogOut size={18} className="text-rose-400" />
-                <span className="hidden sm:inline">{isSigningOut ? 'Выход...' : 'Выйти'}</span>
+                <span className="hidden sm:inline">{isSigningOut ? t('common.signingOut') : t('common.signOut')}</span>
               </button>
             </>
           )}

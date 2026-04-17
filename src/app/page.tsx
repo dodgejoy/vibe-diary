@@ -1,20 +1,22 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { GameGrid, PopularGames } from '@/components';
+import { GameGrid, PopularGames, InteractiveDemo } from '@/components';
 import { useAuth } from '@/components/AuthProvider';
 import { fetchGames, Game } from '@/lib/supabase';
 import { Loader, Plus, Gamepad2, Trophy, Clock, Star, BookOpen, Share2, BarChart3, Search, ArrowRight, Sparkles, UserCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n';
 
 /* ───────────────────── Guest Landing Page ───────────────────── */
 
 function GuestLanding() {
+  const { t } = useTranslation();
   const features = [
     {
       icon: Gamepad2,
-      title: 'Отслеживай прогресс',
-      description: 'Добавляй игры в библиотеку, отмечай статус — играю, пройдена, заброшена. Всё в одном месте.',
+      title: t('landing.features.trackProgress'),
+      description: t('landing.features.trackProgressDesc'),
       color: 'violet',
       gradient: 'from-violet-500/20 to-indigo-500/20',
       border: 'border-violet-500/20',
@@ -22,8 +24,8 @@ function GuestLanding() {
     },
     {
       icon: Star,
-      title: 'Детальные оценки',
-      description: 'Оценивай по 7+ категориям: геймплей, визуал, атмосфера, звук. Получай точный балл вместо абстрактной «десятки».',
+      title: t('landing.features.detailedRatings'),
+      description: t('landing.features.detailedRatingsDesc'),
       color: 'amber',
       gradient: 'from-amber-500/20 to-orange-500/20',
       border: 'border-amber-500/20',
@@ -31,8 +33,8 @@ function GuestLanding() {
     },
     {
       icon: BookOpen,
-      title: 'Пиши рецензии',
-      description: 'Заголовок, плюсы, минусы, личные заметки — всё сохраняется. Оформляй свои мысли об играх.',
+      title: t('landing.features.writeReviews'),
+      description: t('landing.features.writeReviewsDesc'),
       color: 'emerald',
       gradient: 'from-emerald-500/20 to-teal-500/20',
       border: 'border-emerald-500/20',
@@ -40,8 +42,8 @@ function GuestLanding() {
     },
     {
       icon: Share2,
-      title: 'Делись карточками',
-      description: 'Генерируй красивые PNG-карточки с оценкой, отзывом и обложкой. Выбирай тему и настраивай видимость.',
+      title: t('landing.features.shareCards'),
+      description: t('landing.features.shareCardsDesc'),
       color: 'sky',
       gradient: 'from-sky-500/20 to-cyan-500/20',
       border: 'border-sky-500/20',
@@ -49,8 +51,8 @@ function GuestLanding() {
     },
     {
       icon: BarChart3,
-      title: 'Статистика и аналитика',
-      description: 'Сколько игр пройдено, во что играешь сейчас — наглядная панель статистики.',
+      title: t('landing.features.stats'),
+      description: t('landing.features.statsDesc'),
       color: 'fuchsia',
       gradient: 'from-fuchsia-500/20 to-pink-500/20',
       border: 'border-fuchsia-500/20',
@@ -58,8 +60,8 @@ function GuestLanding() {
     },
     {
       icon: Search,
-      title: 'Каталог RAWG',
-      description: 'Ищи игры в огромной базе RAWG. Обложки, жанры, даты выхода — подтягиваются автоматически.',
+      title: t('landing.features.rawgCatalog'),
+      description: t('landing.features.rawgCatalogDesc'),
       color: 'rose',
       gradient: 'from-rose-500/20 to-red-500/20',
       border: 'border-rose-500/20',
@@ -82,18 +84,18 @@ function GuestLanding() {
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-violet-500/10 border border-violet-500/20 rounded-full text-violet-400 text-sm font-semibold mb-8">
               <Sparkles size={16} />
-              Бесплатный игровой дневник
+              {t('landing.badge')}
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
-              <span className="text-white">Твой Игровой</span>
+              <span className="text-white">{t('landing.heroTitle1')}</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-400">
-                Путь Важен
+                {t('landing.heroTitle2')}
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-300/90 leading-relaxed max-w-2xl mx-auto mb-10">
-              Не дай эпичным моментам исчезнуть. Отслеживай прогресс, пиши детальные рецензии и создавай свою идеальную игровую библиотеку.
+              {t('landing.heroSubtitle')}
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -102,14 +104,14 @@ function GuestLanding() {
                 className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-2xl transition-all shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] hover:-translate-y-1 text-lg"
               >
                 <UserCircle2 size={22} />
-                Начать бесплатно
+                {t('landing.startFree')}
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="/popular"
                 className="inline-flex items-center gap-2 px-6 py-4 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-slate-200 hover:text-white font-semibold rounded-2xl transition-all text-lg"
               >
-                Популярные игры
+                {t('common.popularGames')}
               </Link>
             </div>
           </div>
@@ -120,9 +122,9 @@ function GuestLanding() {
       <section className="relative px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-800/50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Всё для твоего игрового опыта</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">{t('landing.featuresTitle')}</h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              Vibe Diary — больше, чем список игр. Это инструмент для тех, кто ценит свои впечатления.
+              {t('landing.featuresSubtitle')}
             </p>
           </div>
 
@@ -150,14 +152,14 @@ function GuestLanding() {
       <section className="relative px-4 sm:px-6 lg:px-8 py-20 border-t border-slate-800/50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Как это работает</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">{t('landing.howItWorks')}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
             {[
-              { step: '01', title: 'Зарегистрируйся', desc: 'Создай аккаунт за 30 секунд. Нужен только email.', icon: UserCircle2, color: 'violet' },
-              { step: '02', title: 'Добавь игры', desc: 'Найди игру в каталоге RAWG — обложка и данные подтянутся автоматически.', icon: Search, color: 'fuchsia' },
-              { step: '03', title: 'Оценивай и делись', desc: 'Ставь оценки, пиши рецензии и делись красивыми карточками.', icon: Share2, color: 'indigo' },
+              { step: '01', title: t('landing.steps.register'), desc: t('landing.steps.registerDesc'), icon: UserCircle2, color: 'violet' },
+              { step: '02', title: t('landing.steps.addGames'), desc: t('landing.steps.addGamesDesc'), icon: Search, color: 'fuchsia' },
+              { step: '03', title: t('landing.steps.rateAndShare'), desc: t('landing.steps.rateAndShareDesc'), icon: Share2, color: 'indigo' },
             ].map((item) => (
               <div key={item.step} className="text-center">
                 <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-${item.color}-500/10 border border-${item.color}-500/20 text-${item.color}-400 mb-5`}>
@@ -175,12 +177,15 @@ function GuestLanding() {
               href="/auth"
               className="group inline-flex items-center gap-2 px-8 py-4 bg-white text-slate-950 hover:bg-slate-100 font-bold rounded-2xl transition-all shadow-xl hover:-translate-y-1 text-lg"
             >
-              Создать аккаунт
+              {t('common.createAccount')}
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Interactive Demo */}
+      <InteractiveDemo />
 
       {/* Popular section */}
       <PopularGames />
@@ -217,6 +222,8 @@ export default function Home() {
 }
 
 function AuthenticatedHome() {
+  const { user } = useAuth();
+  const { t } = useTranslation();
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -225,7 +232,7 @@ function AuthenticatedHome() {
     async function loadGames() {
       setIsLoading(true);
       try {
-        const data = await fetchGames();
+        const data = await fetchGames(user?.id);
         setGames(data);
       } catch (err) {
         setError('Failed to load games. Please check your Supabase configuration.');
@@ -268,14 +275,14 @@ function AuthenticatedHome() {
         <div className="relative max-w-7xl mx-auto w-full z-10">
           <div className="text-center md:text-left mb-12 max-w-3xl">
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
-              <span className="text-white drop-shadow-md">Твой Игровой</span>
+              <span className="text-white drop-shadow-md">{t('landing.heroTitle1')}</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-indigo-400 drop-shadow-sm">
-                Путь Важен
+                {t('landing.heroTitle2')}
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-slate-300/90 leading-relaxed max-w-2xl font-light">
-              Не дай эпичным моментам исчезнуть. Отслеживай прогресс, пиши рецензии и создавай свою идеальную игровую библиотеку.
+              {t('home.heroSubtitle')}
             </p>
           </div>
 
@@ -289,7 +296,7 @@ function AuthenticatedHome() {
                 </div>
                 <div>
                   <div className="text-4xl font-bold text-white group-hover:text-violet-100 transition-colors">{games.length}</div>
-                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">Игр отслежено</div>
+                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">{t('home.gamesTracked')}</div>
                 </div>
               </div>
             </div>
@@ -304,7 +311,7 @@ function AuthenticatedHome() {
                   <div className="text-4xl font-bold text-white group-hover:text-emerald-100 transition-colors">
                     {completedCount}
                   </div>
-                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">Пройдено</div>
+                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">{t('home.completed')}</div>
                 </div>
               </div>
             </div>
@@ -319,7 +326,7 @@ function AuthenticatedHome() {
                   <div className="text-4xl font-bold text-white group-hover:text-sky-100 transition-colors">
                     {playingCount}
                   </div>
-                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">Сейчас играю</div>
+                  <div className="text-sm font-medium text-slate-400 uppercase tracking-wider mt-1">{t('home.nowPlaying')}</div>
                 </div>
               </div>
             </div>
@@ -333,7 +340,7 @@ function AuthenticatedHome() {
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-3xl font-bold text-white flex items-center gap-3">
               <span className="bg-slate-800 p-2 rounded-lg border border-slate-700 shadow-inner">🎮</span>
-              Твоя Игровая Библиотека
+              {t('home.yourLibrary')}
             </h2>
             
             {/* Quick Add Button next to title for easy access */}
@@ -343,7 +350,7 @@ function AuthenticatedHome() {
                 className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-medium rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
                 <Plus size={18} className="text-violet-400" />
-                <span>Добавить игру</span>
+                <span>{t('common.addGame')}</span>
               </Link>
             )}
           </div>
@@ -355,7 +362,7 @@ function AuthenticatedHome() {
                   <div className="w-16 h-16 border-4 border-slate-800 rounded-full" />
                   <div className="absolute top-0 left-0 w-16 h-16 border-4 border-violet-500 rounded-full border-t-transparent animate-spin" />
                 </div>
-                <p className="text-slate-400 font-medium tracking-wide animate-pulse">Синхронизация библиотеки...</p>
+                <p className="text-slate-400 font-medium tracking-wide animate-pulse">{t('home.syncingLibrary')}</p>
               </div>
             </div>
           ) : error ? (
@@ -363,7 +370,7 @@ function AuthenticatedHome() {
               <div className="inline-block p-4 bg-red-900/30 rounded-full mb-4">
                 <span className="text-3xl">⚠️</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Ошибка подключения</h3>
+              <h3 className="text-xl font-bold mb-2">{t('home.connectionError')}</h3>
               <p className="text-red-300/80 mb-6">{error}</p>
               <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800 inline-block text-left">
                 <p className="text-sm text-slate-300">
@@ -382,16 +389,16 @@ function AuthenticatedHome() {
                 <div className="w-24 h-24 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 border-8 border-slate-900 shadow-xl">
                   <Gamepad2 size={40} className="text-slate-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Ваша библиотека пуста</h3>
+                <h3 className="text-2xl font-bold text-white mb-3">{t('home.emptyLibrary')}</h3>
                 <p className="text-slate-400 text-lg mb-8 max-w-md mx-auto">
-                  Каждое великое путешествие начинается с одной игры. Добавь свою первую игру и начни документировать свои приключения.
+                  {t('home.emptyLibraryDesc')}
                 </p>
                 <Link
                   href="/add-game"
                   className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] hover:-translate-y-1"
                 >
                   <Plus size={22} />
-                  Добавить первую игру
+                  {t('common.addFirstGame')}
                 </Link>
               </div>
             </div>

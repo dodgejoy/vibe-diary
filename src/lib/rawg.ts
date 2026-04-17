@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY || '';
 
@@ -16,6 +14,17 @@ function getCached<T>(key: string): T | undefined {
 
 function setCache(key: string, data: unknown) {
   cache.set(key, { data, ts: Date.now() });
+}
+
+async function rawgFetch(path: string, params: Record<string, string | number> = {}): Promise<any> {
+  const url = new URL(`${RAWG_BASE_URL}${path}`);
+  url.searchParams.set('key', RAWG_API_KEY);
+  for (const [k, v] of Object.entries(params)) {
+    url.searchParams.set(k, String(v));
+  }
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`RAWG API error: ${res.status}`);
+  return res.json();
 }
 
 export type RawgGame = {
@@ -60,15 +69,9 @@ export async function searchGames(query: string): Promise<RawgGame[]> {
     const cached = getCached<RawgGame[]>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${RAWG_BASE_URL}/games`, {
-      params: {
-        key: RAWG_API_KEY,
-        search: query,
-        page_size: 20,
-      },
-    });
+    const data = await rawgFetch('/games', { search: query, page_size: 20 });
 
-    const results = response.data.results || [];
+    const results = data.results || [];
     setCache(cacheKey, results);
     return results;
   } catch (error) {
@@ -88,14 +91,10 @@ export async function getGameDetails(id: number): Promise<GameDetails | null> {
     const cached = getCached<GameDetails>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${RAWG_BASE_URL}/games/${id}`, {
-      params: {
-        key: RAWG_API_KEY,
-      },
-    });
+    const data = await rawgFetch(`/games/${id}`);
 
-    setCache(cacheKey, response.data);
-    return response.data;
+    setCache(cacheKey, data);
+    return data;
   } catch (error) {
     console.error('Error fetching game details:', error);
     return null;
@@ -113,14 +112,9 @@ export async function getGameScreenshots(id: number): Promise<GameDetails['scree
     const cached = getCached<GameDetails['screenshots']>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${RAWG_BASE_URL}/games/${id}/screenshots`, {
-      params: {
-        key: RAWG_API_KEY,
-        page_size: 12,
-      },
-    });
+    const data = await rawgFetch(`/games/${id}/screenshots`, { page_size: 12 });
 
-    const results = response.data.results || [];
+    const results = data.results || [];
     setCache(cacheKey, results);
     return results;
   } catch (error) {
@@ -137,15 +131,14 @@ export async function getGameRedditPosts(id: number): Promise<any[]> {
       return [];
     }
 
-    const response = await axios.get(`${RAWG_BASE_URL}/games/${id}/reddit`, {
-      params: {
-        key: RAWG_API_KEY,
-        page_size: 10,
-      },
-      timeout: 5000,
-    });
-
-    return response.data.results || [];
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+      const data = await rawgFetch(`/games/${id}/reddit`, { page_size: 10 });
+      return data.results || [];
+    } finally {
+      clearTimeout(timeout);
+    }
   } catch {
     return [];
   }
@@ -162,15 +155,9 @@ export async function getSimilarGames(id: number): Promise<RawgGame[]> {
     const cached = getCached<RawgGame[]>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${RAWG_BASE_URL}/games`, {
-      params: {
-        key: RAWG_API_KEY,
-        page_size: 8,
-        ordering: '-rating',
-      },
-    });
+    const data = await rawgFetch('/games', { page_size: 8, ordering: '-rating' });
 
-    const results = response.data.results?.slice(0, 6) || [];
+    const results = data.results?.slice(0, 6) || [];
     setCache(cacheKey, results);
     return results;
   } catch (error) {

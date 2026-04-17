@@ -2,12 +2,14 @@
 
 import { GameDetails } from '@/lib/rawg';
 import { Award, Zap, Users, Building2, Gamepad2, Globe, Cpu } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface GameInfoPanelProps {
   details: GameDetails | null;
 }
 
 export function GameInfoPanel({ details }: GameInfoPanelProps) {
+  const { t } = useTranslation();
   if (!details) {
     return null;
   }
@@ -19,28 +21,28 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
         {details.rating != null && details.rating > 0 && (
           <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-violet-400">{details.rating.toFixed(1)}</div>
-            <div className="text-xs text-slate-400 mt-1">RAWG Рейтинг</div>
+            <div className="text-xs text-slate-400 mt-1">{t('gameInfo.rawgRating')}</div>
           </div>
         )}
 
         {details.metacritic != null && details.metacritic > 0 && (
           <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-emerald-400">{details.metacritic}</div>
-            <div className="text-xs text-slate-400 mt-1">Metacritic</div>
+            <div className="text-xs text-slate-400 mt-1">{t('gameInfo.metacritic')}</div>
           </div>
         )}
 
         {details.playtime != null && details.playtime > 0 && (
           <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-blue-400">{details.playtime}h</div>
-            <div className="text-xs text-slate-400 mt-1">Ср. время игры</div>
+            <div className="text-xs text-slate-400 mt-1">{t('gameInfo.avgPlaytime')}</div>
           </div>
         )}
 
         {details.achievements_count != null && details.achievements_count > 0 && (
           <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 text-center">
             <div className="text-2xl font-bold text-amber-400">{details.achievements_count}</div>
-            <div className="text-xs text-slate-400 mt-1">Достижения</div>
+            <div className="text-xs text-slate-400 mt-1">{t('gameInfo.achievements')}</div>
           </div>
         )}
       </div>
@@ -48,7 +50,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
       {/* Description */}
       {details.description_raw && (
         <div className="space-y-2">
-          <h2 className="text-xl font-bold text-white">Об игре</h2>
+          <h2 className="text-xl font-bold text-white">{t('gameInfo.aboutGame')}</h2>
           <p className="text-slate-300 text-sm leading-relaxed line-clamp-6">
             {details.description_raw}
           </p>
@@ -62,7 +64,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white font-semibold">
               <Users size={18} className="text-violet-400" />
-              Разработчики
+              {t('gameInfo.developers')}
             </div>
             <div className="flex flex-wrap gap-2">
               {details.developers.map((dev) => (
@@ -82,7 +84,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-white font-semibold">
               <Building2 size={18} className="text-violet-400" />
-              Издатели
+              {t('gameInfo.publishers')}
             </div>
             <div className="flex flex-wrap gap-2">
               {details.publishers.map((pub) => (
@@ -103,7 +105,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-white font-semibold">
             <Gamepad2 size={18} className="text-violet-400" />
-            Platforms
+            {t('gameInfo.platforms')}
           </div>
           <div className="flex flex-wrap gap-2">
             {details.platforms.map((platform) => (
@@ -122,7 +124,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-700">
         {details.released && (
           <div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Дата выхода</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">{t('gameInfo.releaseDate')}</div>
             <div className="text-sm text-white font-semibold mt-1">
               {new Date(details.released).toLocaleDateString()}
             </div>
@@ -131,7 +133,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
 
         {details.ratings_count != null && details.ratings_count > 0 && (
           <div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Оценки</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">{t('gameInfo.ratings')}</div>
             <div className="text-sm text-white font-semibold mt-1">
               {details.ratings_count.toLocaleString()}
             </div>
@@ -140,7 +142,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
 
         {details.reviews_count != null && details.reviews_count > 0 && (
           <div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Обзоры</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">{t('gameInfo.reviews')}</div>
             <div className="text-sm text-white font-semibold mt-1">
               {details.reviews_count.toLocaleString()}
             </div>
@@ -157,7 +159,7 @@ export function GameInfoPanel({ details }: GameInfoPanelProps) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white rounded-lg transition-colors font-medium"
         >
           <Globe size={16} />
-          Официальный сайт
+          {t('gameInfo.officialSite')}
         </a>
       )}
     </div>

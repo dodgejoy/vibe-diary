@@ -31,12 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     const loadAuth = async () => {
-      const [{ data: sessionData }, { data: userData }] = await Promise.all([
-        supabase.auth.getSession(),
-        supabase.auth.getUser(),
-      ]);
+      const { data: sessionData } = await supabase.auth.getSession();
 
-      const nextUser = userData.user ?? null;
+      const nextUser = sessionData.session?.user ?? null;
       const nextProfile = nextUser ? await fetchCurrentUserProfile(nextUser.id) : null;
 
       if (!isMounted) {

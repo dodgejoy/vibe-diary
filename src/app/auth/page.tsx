@@ -6,11 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Gamepad2, Loader, LogIn, UserPlus } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail } from '@/lib/supabase';
 import { useAuth } from '@/components';
+import { useTranslation } from '@/i18n';
 
 function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, isConfigured } = useAuth();
+  const { t } = useTranslation();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -35,7 +37,7 @@ function AuthPageContent() {
     setMessage(null);
 
     if (mode === 'signup' && password !== confirmPassword) {
-      setError('Пароли не совпадают.');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -60,8 +62,8 @@ function AuthPageContent() {
 
       setMessage(
         result.needsEmailConfirmation
-          ? 'Аккаунт создан. Проверьте почту для подтверждения адреса перед входом.'
-          : 'Аккаунт создан. Вы можете начать использовать Vibe Diary.'
+          ? t('auth.accountCreatedConfirmEmail')
+          : t('auth.accountCreatedReady')
       );
     } finally {
       setIsSubmitting(false);
@@ -78,34 +80,34 @@ function AuthPageContent() {
           <div className="relative z-10 space-y-8">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/70 border border-white/10 text-violet-300 text-sm font-semibold">
               <Gamepad2 size={18} />
-              Аккаунт Vibe Diary
+              {t('auth.accountTitle')}
             </div>
 
             <div className="space-y-4 max-w-xl">
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-                Сохрани свою библиотеку,
+                {t('auth.keepLibrarySafe')}
                 <br />
-                оценки и прогресс.
+                {t('auth.ratingsAndProgress')}
               </h1>
               <p className="text-lg text-slate-400 leading-relaxed">
-                Аккаунт хранит ваш дневник в безопасности и привязывает каждую игру, рецензию и профиль к вашей коллекции.
+                {t('auth.accountDescription')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Личная библиотека привязана к вашему аккаунту.
+                {t('auth.personalLibrary')}
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Отслеживание прогресса для авторизованного пользователя.
+                {t('auth.progressTracking')}
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Аналитика и шаринг на основе стабильных профилей.
+                {t('auth.analyticsSharing')}
               </div>
             </div>
 
             <Link href="/" className="inline-flex text-sm text-slate-400 hover:text-white transition-colors">
-              На главную
+              {t('common.toHome')}
             </Link>
           </div>
         </div>
@@ -118,7 +120,7 @@ function AuthPageContent() {
                 mode === 'signin' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Войти
+              {t('auth.signInTab')}
             </button>
             <button
               onClick={() => setMode('signup')}
@@ -126,13 +128,13 @@ function AuthPageContent() {
                 mode === 'signup' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Создать аккаунт
+              {t('auth.createAccountTab')}
             </button>
           </div>
 
           {!isConfigured ? (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 text-amber-100">
-              Добавьте Supabase URL и anon key в переменные окружения перед использованием аккаунтов.
+              {t('auth.supabaseNotConfigured')}
             </div>
           ) : isLoading ? (
             <div className="min-h-72 flex items-center justify-center">
@@ -154,13 +156,13 @@ function AuthPageContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Пароль</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">{t('auth.passwordLabel')}</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
-                  placeholder="Минимум 6 символов"
+                  placeholder={t('auth.passwordPlaceholder')}
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                   minLength={6}
                   required
@@ -169,13 +171,13 @@ function AuthPageContent() {
 
               {mode === 'signup' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Подтвердите пароль</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">{t('auth.confirmPasswordLabel')}</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
-                    placeholder="Повторите пароль"
+                    placeholder={t('auth.confirmPasswordPlaceholder')}
                     autoComplete="new-password"
                     minLength={6}
                     required
@@ -203,17 +205,17 @@ function AuthPageContent() {
                 {isSubmitting ? (
                   <>
                     <Loader className="animate-spin" size={18} />
-                    Обработка...
+                    {t('common.processing')}
                   </>
                 ) : mode === 'signin' ? (
                   <>
                     <LogIn size={18} />
-                    Войти
+                    {t('auth.signInTab')}
                   </>
                 ) : (
                   <>
                     <UserPlus size={18} />
-                    Создать аккаунт
+                    {t('auth.createAccountTab')}
                   </>
                 )}
               </button>

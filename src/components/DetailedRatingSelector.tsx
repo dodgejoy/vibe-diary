@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { DetailedRatings, getMaxScore, getNormalizedScore } from '@/lib/supabase';
 import { X, Check, RotateCcw, Zap, BookOpen } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface DetailedRatingSelectorProps {
   value?: DetailedRatings | null;
@@ -23,20 +24,6 @@ type CriterionDef = {
   desc: string;
 };
 
-const BASE_CRITERIA: CriterionDef[] = [
-  { key: 'gameplay', name: 'Геймплей', max: 20, color: 'from-blue-500 to-indigo-500', hex: '#6366f1', icon: '🎮', desc: 'Механики, управление, баланс' },
-  { key: 'visuals', name: 'Визуал', max: 15, color: 'from-cyan-400 to-blue-500', hex: '#0ea5e9', icon: '🎨', desc: 'Графика, стиль, анимации' },
-  { key: 'atmosphere', name: 'Атмосфера', max: 15, color: 'from-fuchsia-500 to-purple-600', hex: '#a855f7', icon: '🌌', desc: 'Мир, погружение, сеттинг' },
-  { key: 'sound', name: 'Звук', max: 10, color: 'from-violet-400 to-fuchsia-500', hex: '#d946ef', icon: '🎵', desc: 'Музыка, эффекты, озвучка' },
-  { key: 'technical', name: 'Техника', max: 10, color: 'from-emerald-400 to-teal-500', hex: '#14b8a6', icon: '⚙️', desc: 'Стабильность, оптимизация' },
-  { key: 'content', name: 'Контент', max: 10, color: 'from-orange-400 to-amber-500', hex: '#f59e0b', icon: '📦', desc: 'Объём, реиграбельность' },
-  { key: 'impression', name: 'Впечатление', max: 10, color: 'from-rose-400 to-pink-500', hex: '#f43f5e', icon: '💎', desc: 'Личные эмоции, послевкусие' },
-];
-
-const STORY_CRITERION: CriterionDef = {
-  key: 'story', name: 'Сюжет', max: 15, color: 'from-amber-400 to-yellow-500', hex: '#eab308', icon: '📖', desc: 'Нарратив, персонажи, развязка',
-};
-
 const STORY_GENRES = [
   'rpg', 'adventure', 'action rpg', 'role-playing', 'visual novel',
   'interactive fiction', 'narrative', 'story', 'jrpg', 'crpg',
@@ -47,32 +34,6 @@ function isStoryGame(genres?: string): boolean {
   if (!genres) return false;
   const lower = genres.toLowerCase();
   return STORY_GENRES.some((g) => lower.includes(g));
-}
-
-const BASE_PRESETS: { name: string; emoji: string; ratings: DetailedRatings }[] = [
-  { name: 'Шедевр', emoji: '👑', ratings: { gameplay: 18, visuals: 14, atmosphere: 14, sound: 9, technical: 9, content: 9, impression: 10 } },
-  { name: 'Отлично', emoji: '🔥', ratings: { gameplay: 16, visuals: 12, atmosphere: 12, sound: 8, technical: 8, content: 8, impression: 8 } },
-  { name: 'Хорошо', emoji: '👍', ratings: { gameplay: 13, visuals: 10, atmosphere: 10, sound: 7, technical: 7, content: 7, impression: 7 } },
-  { name: 'Средне', emoji: '😐', ratings: { gameplay: 10, visuals: 8, atmosphere: 7, sound: 5, technical: 5, content: 5, impression: 5 } },
-  { name: 'Слабо', emoji: '👎', ratings: { gameplay: 6, visuals: 4, atmosphere: 4, sound: 3, technical: 3, content: 3, impression: 3 } },
-];
-
-function presetsWithStory(include: boolean): typeof BASE_PRESETS {
-  if (!include) return BASE_PRESETS;
-  return BASE_PRESETS.map((p) => ({
-    ...p,
-    ratings: { ...p.ratings, story: Math.round((Object.values(p.ratings).reduce((a, b) => a + b, 0) / 90) * 15) },
-  }));
-}
-
-function getCriterionLevel(value: number, max: number): { label: string; color: string } {
-  const pct = value / max;
-  if (pct >= 0.9) return { label: 'Великолепно', color: 'text-yellow-400' };
-  if (pct >= 0.75) return { label: 'Отлично', color: 'text-emerald-400' };
-  if (pct >= 0.6) return { label: 'Хорошо', color: 'text-blue-400' };
-  if (pct >= 0.4) return { label: 'Нормально', color: 'text-orange-400' };
-  if (pct > 0) return { label: 'Слабо', color: 'text-rose-400' };
-  return { label: 'Не оценено', color: 'text-slate-600' };
 }
 
 function getMoodEmoji(score: number): string {
@@ -93,6 +54,48 @@ export function DetailedRatingSelector({
   isOpen = true,
   onOpenChange,
 }: DetailedRatingSelectorProps) {
+  const { t } = useTranslation();
+
+  const BASE_CRITERIA: CriterionDef[] = [
+    { key: 'gameplay', name: t('ratingSelector.gameplay'), max: 20, color: 'from-blue-500 to-indigo-500', hex: '#6366f1', icon: '🎮', desc: t('ratingSelector.gameplayDesc') },
+    { key: 'visuals', name: t('ratingSelector.visuals'), max: 15, color: 'from-cyan-400 to-blue-500', hex: '#0ea5e9', icon: '🎨', desc: t('ratingSelector.visualsDesc') },
+    { key: 'atmosphere', name: t('ratingSelector.atmosphere'), max: 15, color: 'from-fuchsia-500 to-purple-600', hex: '#a855f7', icon: '🌌', desc: t('ratingSelector.atmosphereDesc') },
+    { key: 'sound', name: t('ratingSelector.sound'), max: 10, color: 'from-violet-400 to-fuchsia-500', hex: '#d946ef', icon: '🎵', desc: t('ratingSelector.soundDesc') },
+    { key: 'technical', name: t('ratingSelector.technical'), max: 10, color: 'from-emerald-400 to-teal-500', hex: '#14b8a6', icon: '⚙️', desc: t('ratingSelector.technicalDesc') },
+    { key: 'content', name: t('ratingSelector.content'), max: 10, color: 'from-orange-400 to-amber-500', hex: '#f59e0b', icon: '📦', desc: t('ratingSelector.contentDesc') },
+    { key: 'impression', name: t('ratingSelector.impression'), max: 10, color: 'from-rose-400 to-pink-500', hex: '#f43f5e', icon: '💎', desc: t('ratingSelector.impressionDesc') },
+  ];
+
+  const STORY_CRITERION: CriterionDef = {
+    key: 'story', name: t('ratingSelector.story'), max: 15, color: 'from-amber-400 to-yellow-500', hex: '#eab308', icon: '📖', desc: t('ratingSelector.storyDesc'),
+  };
+
+  const BASE_PRESETS: { name: string; emoji: string; ratings: DetailedRatings }[] = [
+    { name: t('ratingSelector.presetMasterpiece'), emoji: '👑', ratings: { gameplay: 18, visuals: 14, atmosphere: 14, sound: 9, technical: 9, content: 9, impression: 10 } },
+    { name: t('ratingSelector.presetExcellent'), emoji: '🔥', ratings: { gameplay: 16, visuals: 12, atmosphere: 12, sound: 8, technical: 8, content: 8, impression: 8 } },
+    { name: t('ratingSelector.presetGood'), emoji: '👍', ratings: { gameplay: 13, visuals: 10, atmosphere: 10, sound: 7, technical: 7, content: 7, impression: 7 } },
+    { name: t('ratingSelector.presetMediocre'), emoji: '😐', ratings: { gameplay: 10, visuals: 8, atmosphere: 7, sound: 5, technical: 5, content: 5, impression: 5 } },
+    { name: t('ratingSelector.presetWeak'), emoji: '👎', ratings: { gameplay: 6, visuals: 4, atmosphere: 4, sound: 3, technical: 3, content: 3, impression: 3 } },
+  ];
+
+  function presetsWithStory(include: boolean): typeof BASE_PRESETS {
+    if (!include) return BASE_PRESETS;
+    return BASE_PRESETS.map((p) => ({
+      ...p,
+      ratings: { ...p.ratings, story: Math.round((Object.values(p.ratings).reduce((a, b) => a + b, 0) / 90) * 15) },
+    }));
+  }
+
+  function getCriterionLevel(value: number, max: number): { label: string; color: string } {
+    const pct = value / max;
+    if (pct >= 0.9) return { label: t('ratingSelector.levelExcellent'), color: 'text-yellow-400' };
+    if (pct >= 0.75) return { label: t('ratingSelector.levelGreat'), color: 'text-emerald-400' };
+    if (pct >= 0.6) return { label: t('ratingSelector.levelGood'), color: 'text-blue-400' };
+    if (pct >= 0.4) return { label: t('ratingSelector.levelOk'), color: 'text-orange-400' };
+    if (pct > 0) return { label: t('ratingSelector.levelWeak'), color: 'text-rose-400' };
+    return { label: t('ratingSelector.levelNone'), color: 'text-slate-600' };
+  }
+
   const showStory = isStoryGame(genres) || (value != null && 'story' in value && value.story !== undefined);
   const CRITERIA = useMemo(() => showStory ? [...BASE_CRITERIA, STORY_CRITERION] : BASE_CRITERIA, [showStory]);
   const PRESETS = useMemo(() => presetsWithStory(showStory), [showStory]);
@@ -125,12 +128,12 @@ export function DetailedRatingSelector({
   const scoreData = getScoreData(totalScore);
 
   const getScoreLabel = (score: number) => {
-    if (score >= 85) return 'Шедевр';
-    if (score >= 75) return 'Отлично';
-    if (score >= 65) return 'Хорошо';
-    if (score >= 55) return 'Неплохо';
-    if (score >= 40) return 'Приемлемо';
-    return 'Слабо';
+    if (score >= 85) return t('ratingSelector.scoreMasterpiece');
+    if (score >= 75) return t('ratingSelector.scoreExcellent');
+    if (score >= 65) return t('ratingSelector.scoreGood');
+    if (score >= 55) return t('ratingSelector.scoreDecent');
+    if (score >= 40) return t('ratingSelector.scoreAcceptable');
+    return t('ratingSelector.scoreWeak');
   };
 
   const handleCriterionChange = (key: keyof DetailedRatings, newValue: number) => {
@@ -246,7 +249,7 @@ export function DetailedRatingSelector({
               <div className={`text-xl font-black text-white tracking-widest uppercase drop-shadow-md`}>
                 {getScoreLabel(totalScore)}
               </div>
-              <div className="text-slate-400 text-sm font-medium mt-1">{totalScore} / {maxScore} баллов</div>
+              <div className="text-slate-400 text-sm font-medium mt-1">{totalScore} / {maxScore} {t('common.points')}</div>
             </div>
             
             {/* Radar Chart */}
@@ -338,8 +341,8 @@ export function DetailedRatingSelector({
           <div className="w-full md:w-[58%] p-6 md:p-8 bg-slate-900/30 relative flex flex-col overflow-hidden">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">Детализация</h2>
-                <p className="text-slate-400 text-sm mt-1 font-medium">Настройте каждый аспект игры</p>
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">{t('ratingSelector.detailPanel')}</h2>
+                <p className="text-slate-400 text-sm mt-1 font-medium">{t('ratingSelector.detailPanelDesc')}</p>
               </div>
               <button
                 onClick={handleClose}
@@ -354,7 +357,7 @@ export function DetailedRatingSelector({
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-2.5">
                 <Zap size={14} className="text-violet-400" />
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Быстрые пресеты</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('ratingSelector.quickPresets')}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {PRESETS.map((preset) => (
@@ -371,13 +374,13 @@ export function DetailedRatingSelector({
                   className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800/80 border border-white/5 text-slate-500 hover:text-rose-400 hover:bg-slate-700 hover:border-rose-500/30 transition-all flex items-center gap-1"
                 >
                   <RotateCcw size={12} />
-                  Сброс
+                  {t('common.reset')}
                 </button>
               </div>
               {showStory && (
                 <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg w-fit">
                   <BookOpen size={14} className="text-amber-400" />
-                  <span className="text-xs font-bold text-amber-300">Сюжетная игра — критерий «Сюжет» активен</span>
+                  <span className="text-xs font-bold text-amber-300">{t('ratingSelector.storyActive')}</span>
                 </div>
               )}
             </div>
@@ -445,7 +448,7 @@ export function DetailedRatingSelector({
                 className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-extrabold text-lg rounded-xl transition-all active:scale-95 shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.5)] border border-white/10"
               >
                 <Check size={22} strokeWidth={3} />
-                Сохранить в дневник
+                {t('ratingSelector.saveToDiary')}
               </button>
             </div>
           </div>

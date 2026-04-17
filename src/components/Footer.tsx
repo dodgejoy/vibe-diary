@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ExternalLink, Heart, Globe, MessageCircle, Gamepad2, GitBranch, Sparkles } from 'lucide-react';
+import { ExternalLink, Heart, Globe, MessageCircle, Gamepad2, GitBranch, Sparkles, Tag } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 export function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="relative border-t border-slate-800/60 bg-slate-950 overflow-hidden pt-16 pb-8">
       {/* Background ambient glow effect */}
@@ -22,7 +24,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-slate-400 text-lg leading-relaxed max-w-sm">
-              Ваше персональное хранилище для игровых воспоминаний. Отслеживай, оценивай и сохраняй каждое цифровое приключение.
+              {t('footer.description')}
             </p>
             
             <div className="flex items-center gap-4 mt-8">
@@ -45,13 +47,13 @@ export function Footer() {
               <li>
                 <Link href="/" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
                   <span className="w-0 h-[1px] bg-violet-400 group-hover:w-4 transition-all duration-300" />
-                  Библиотека
+                  {t('header.library')}
                 </Link>
               </li>
               <li>
                 <Link href="/add-game" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
                   <span className="w-0 h-[1px] bg-violet-400 group-hover:w-4 transition-all duration-300" />
-                  Добавить игру
+                  {t('common.addGame')}
                 </Link>
               </li>
             </ul>
@@ -72,7 +74,7 @@ export function Footer() {
               >
                 <div className="flex flex-col">
                   <span className="text-white font-bold">RAWG API</span>
-                  <span className="text-xs text-slate-500 font-medium">База данных и обложки</span>
+                  <span className="text-xs text-slate-500 font-medium">{t('footer.rawgDesc')}</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-white transition-colors" />
               </a>
@@ -84,7 +86,7 @@ export function Footer() {
               >
                 <div className="flex flex-col">
                   <span className="text-emerald-400 font-bold">Supabase</span>
-                  <span className="text-xs text-slate-500 font-medium">Бэкенд и аутентификация</span>
+                  <span className="text-xs text-slate-500 font-medium">{t('footer.supabaseDesc')}</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
               </a>
@@ -98,7 +100,7 @@ export function Footer() {
                   <span className="text-indigo-400 font-bold flex items-center gap-1.5">
                     <GitBranch size={14} /> GitHub
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">Контроль версий</span>
+                  <span className="text-xs text-slate-500 font-medium">{t('footer.githubDesc')}</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
               </a>
@@ -107,7 +109,7 @@ export function Footer() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 font-black flex items-center gap-1.5 drop-shadow-md">
                     <Sparkles size={14} className="text-fuchsia-400" /> Antigravity
                   </span>
-                  <span className="text-[10px] uppercase font-bold text-violet-400/80 tracking-wider">ИИ-ассистент</span>
+                  <span className="text-[10px] uppercase font-bold text-violet-400/80 tracking-wider">{t('footer.antigravityDesc')}</span>
                 </div>
                 <Heart size={16} className="text-fuchsia-500/50 group-hover:text-fuchsia-500 group-hover:fill-fuchsia-500 transition-colors" />
               </div>
@@ -118,13 +120,19 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-slate-500 font-medium text-sm flex items-center">
-            &copy; {new Date().getFullYear()} Vibe Diary. Все права защищены.
+            &copy; {new Date().getFullYear()} {t('footer.copyright')}
+          </div>
+
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+            <Tag size={12} className="text-emerald-400" />
+            <span className="text-xs font-bold text-emerald-400">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+            <span className="text-[10px] text-emerald-500/70 font-semibold uppercase tracking-wider">{t('footer.release')}</span>
           </div>
           
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-full border border-slate-800/80 text-sm font-medium text-slate-400">
-            Создано с 
+            {t('footer.madeWith')}
             <Heart size={16} className="text-rose-500 fill-rose-500 animate-pulse drop-shadow-[0_0_8px_rgba(243,24,103,0.5)]" /> 
-            для геймеров
+            {t('footer.forGamers')}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { ExternalLink, MessageSquare, ArrowUpCircle } from 'lucide-react';
 import Image from 'next/image';
+import { useTranslation } from '@/i18n';
 
 interface RedditPost {
   id: string;
@@ -19,15 +20,16 @@ interface CommunityDiscussionsProps {
 }
 
 export function CommunityDiscussions({ posts }: CommunityDiscussionsProps) {
+  const { t } = useTranslation();
   if (!posts || posts.length === 0) return null;
 
   return (
     <div className="space-y-4">
       <h3 className="text-2xl font-bold text-white flex items-center gap-3">
         <MessageSquare className="text-orange-500" />
-        Комьюнити & Советы
+        {t('communityDiscussions.title')}
       </h3>
-      <p className="text-slate-400 text-sm mb-6">Самые интересные обсуждения Reddit об этой игре.</p>
+      <p className="text-slate-400 text-sm mb-6">{t('communityDiscussions.subtitle')}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {posts.slice(0, 6).map((post) => (
@@ -54,7 +56,7 @@ export function CommunityDiscussions({ posts }: CommunityDiscussionsProps) {
                 {post.name}
               </h4>
               <p className="text-xs text-slate-500 mt-2 line-clamp-3">
-                {post.text?.replace(/&amp;/g, '&') || 'Нажми, чтобы прочитать обсуждение на Reddit.'}
+                {post.text?.replace(/&amp;/g, '&') || t('communityDiscussions.fallbackText')}
               </p>
               
               <div className="mt-auto pt-4 flex items-center justify-between text-xs text-slate-400">

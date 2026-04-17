@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Save, Loader } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface NoteEditorProps {
   initialValue?: string;
@@ -9,10 +10,11 @@ interface NoteEditorProps {
   placeholder?: string;
 }
 
-export function NoteEditor({ initialValue = '', onSave, placeholder = 'Add your notes here...' }: NoteEditorProps) {
+export function NoteEditor({ initialValue = '', onSave, placeholder }: NoteEditorProps) {
   const [notes, setNotes] = useState(initialValue);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const { t } = useTranslation();
 
   const handleSave = useCallback(async () => {
     if (!onSave) return;
@@ -34,13 +36,13 @@ export function NoteEditor({ initialValue = '', onSave, placeholder = 'Add your 
       <textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder || t('noteEditor.placeholder')}
         className="w-full h-64 px-4 py-3 bg-slate-800 border border-slate-700 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all resize-none"
       />
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-slate-400">
-          {notes.length} characters
+          {notes.length} {t('noteEditor.characters')}
         </span>
 
         <button
@@ -59,17 +61,17 @@ export function NoteEditor({ initialValue = '', onSave, placeholder = 'Add your 
           {isSaving ? (
             <>
               <Loader size={16} className="animate-spin" />
-              Saving...
+              {t('noteEditor.saving')}
             </>
           ) : isSaved ? (
             <>
               <Save size={16} />
-              Saved
+              {t('noteEditor.saved')}
             </>
           ) : (
             <>
               <Save size={16} />
-              Save Notes
+              {t('noteEditor.save')}
             </>
           )}
         </button>

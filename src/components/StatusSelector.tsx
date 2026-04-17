@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslation } from '@/i18n';
 
 interface StatusSelectorProps {
   value: string;
@@ -9,15 +10,16 @@ interface StatusSelectorProps {
 
 const STATUSES = ['Not Started', 'Playing', 'Completed', 'Abandoned'];
 
-const STATUS_LABELS: Record<string, string> = {
-  'Not Started': 'Не начата',
-  'Playing': 'Играю',
-  'Completed': 'Пройдена',
-  'Abandoned': 'Заброшена',
-};
-
 export function StatusSelector({ value, onChange }: StatusSelectorProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const { t } = useTranslation();
+
+  const STATUS_LABELS: Record<string, string> = {
+    'Not Started': t('status.notStarted'),
+    'Playing': t('status.playing'),
+    'Completed': t('status.completed'),
+    'Abandoned': t('status.abandoned'),
+  };
 
   const handleStatusChange = async (newStatus: string) => {
     if (!onChange || newStatus === value) return;
@@ -33,7 +35,7 @@ export function StatusSelector({ value, onChange }: StatusSelectorProps) {
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-slate-300">
-        Статус
+        {t('status.label')}
       </label>
       <div className="flex flex-wrap gap-2">
         {STATUSES.map((status) => (

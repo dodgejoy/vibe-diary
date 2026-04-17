@@ -3,19 +3,21 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { RawgGame } from '@/lib/rawg';
+import { useTranslation } from '@/i18n';
 
 interface SimilarGamesProps {
   games: RawgGame[];
 }
 
 export function SimilarGames({ games }: SimilarGamesProps) {
+  const { t } = useTranslation();
   if (games.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Похожие игры</h2>
+      <h2 className="text-2xl font-bold text-white">{t('similarGames.title')}</h2>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {games.map((game) => (
@@ -35,7 +37,7 @@ export function SimilarGames({ games }: SimilarGamesProps) {
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-400">
-                  <span className="text-xs">Нет изображения</span>
+                  <span className="text-xs">{t('similarGames.noImage')}</span>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface Screenshot {
   id: number;
@@ -15,6 +16,7 @@ interface ScreenshotGalleryProps {
 
 export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { t } = useTranslation();
 
   if (screenshots.length === 0) {
     return null;
@@ -34,7 +36,7 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white">Скриншоты</h2>
+      <h2 className="text-2xl font-bold text-white">{t('screenshotGallery.title')}</h2>
 
       {/* Thumbnail Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -46,7 +48,7 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
           >
             <Image
               src={screenshot.image}
-              alt={`Скриншот ${index + 1}`}
+              alt={t('screenshotGallery.altText', { index: String(index + 1) })}
               fill
               className="object-cover group-hover:scale-110 transition-transform"
             />
@@ -71,7 +73,7 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
             <div className="relative h-96 sm:h-[500px] lg:h-[600px] bg-black rounded-lg overflow-hidden">
               <Image
                 src={screenshots[selectedIndex].image}
-                alt={`Скриншот ${selectedIndex + 1}`}
+                alt={t('screenshotGallery.altText', { index: String(selectedIndex + 1) })}
                 fill
                 className="object-contain"
               />

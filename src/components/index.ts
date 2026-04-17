@@ -18,7 +18,7 @@ export { ErrorBoundary } from './ErrorBoundary';
 
 export { ReviewEditor } from './ReviewEditor';
 export { CommunityDiscussions } from './CommunityDiscussions';
-export { GameScratchpad } from './GameScratchpad';
 export { SteamDeckCompanion } from './SteamDeckCompanion';
 export { GameShareModal } from './GameShareModal';
 export { PopularGames } from './PopularGames';
+export { InteractiveDemo } from './InteractiveDemo';

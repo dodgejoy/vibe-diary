@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { Game, getNormalizedScore } from '@/lib/supabase';
 import { StatusBadge } from './StatusBadge';
 import { ChevronRight, Gamepad2 } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface GameCardProps {
   game: Game;
 }
 
 export function GameCard({ game }: GameCardProps) {
+  const { t } = useTranslation();
   return (
     <Link href={`/games/${game.id}`}>
       <div className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 hover:from-slate-800/80 hover:to-slate-800/80 transition-all duration-300 cursor-pointer h-full shadow-lg hover:shadow-2xl hover:shadow-violet-500/25 border border-slate-700/50 hover:border-violet-500/50 backdrop-blur-sm hover:-translate-y-2">
@@ -26,7 +28,7 @@ export function GameCard({ game }: GameCardProps) {
             />
           ) : (
             <div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-800 to-slate-900 text-slate-400">
-              <span className="text-sm">Нет обложки</span>
+              <span className="text-sm">{t('common.noImage')}</span>
             </div>
           )}
           {/* Overlay Gradient */}

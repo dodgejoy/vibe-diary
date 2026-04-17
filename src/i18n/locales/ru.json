@@ -1,0 +1,492 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "deleting": "Удаление...",
+    "back": "Назад",
+    "error": "Ошибка",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "signingOut": "Выход...",
+    "createAccount": "Создать аккаунт",
+    "processing": "Обработка...",
+    "addGame": "Добавить игру",
+    "addFirstGame": "Добавить первую игру",
+    "popularGames": "Популярные игры",
+    "library": "Библиотека",
+    "admin": "Админ",
+    "reset": "Сбросить",
+    "noImage": "Нет обложки",
+    "refreshPage": "Обновить страницу",
+    "viewAll": "Смотреть все",
+    "toHome": "На главную",
+    "search": "Найти",
+    "searching": "Поиск...",
+    "points": "баллов"
+  },
+
+  "header": {
+    "logo": "VIBE DIARY",
+    "subtitle": "Библиотека игр",
+    "popular": "Популярное",
+    "admin": "Админ",
+    "adminBadge": "Admin",
+    "library": "Библиотека"
+  },
+
+  "footer": {
+    "logo": "VIBE DIARY",
+    "description": "Ваше персональное хранилище для игровых воспоминаний. Отслеживай, оценивай и сохраняй каждое цифровое приключение.",
+    "navigation": "Навигация",
+    "poweredBy": "При поддержке",
+    "rawgDesc": "База данных и обложки",
+    "supabaseDesc": "Бэкенд и аутентификация",
+    "githubDesc": "Контроль версий",
+    "antigravityDesc": "ИИ-ассистент",
+    "copyright": "Vibe Diary. Все права защищены.",
+    "madeWith": "Создано с",
+    "forGamers": "для геймеров",
+    "release": "Релиз"
+  },
+
+  "landing": {
+    "badge": "Бесплатный игровой дневник",
+    "heroTitle1": "Твой Игровой",
+    "heroTitle2": "Путь Важен",
+    "heroSubtitle": "Не дай эпичным моментам исчезнуть. Отслеживай прогресс, пиши детальные рецензии и создавай свою идеальную игровую библиотеку.",
+    "startFree": "Начать бесплатно",
+    "featuresTitle": "Всё для твоего игрового опыта",
+    "featuresSubtitle": "Vibe Diary — больше, чем список игр. Это инструмент для тех, кто ценит свои впечатления.",
+    "howItWorks": "Как это работает",
+    "features": {
+      "trackProgress": "Отслеживай прогресс",
+      "trackProgressDesc": "Добавляй игры в библиотеку, отмечай статус — играю, пройдена, заброшена. Всё в одном месте.",
+      "detailedRatings": "Детальные оценки",
+      "detailedRatingsDesc": "Оценивай по 7+ категориям: геймплей, визуал, атмосфера, звук. Получай точный балл вместо абстрактной «десятки».",
+      "writeReviews": "Пиши рецензии",
+      "writeReviewsDesc": "Заголовок, плюсы, минусы, личные заметки — всё сохраняется. Оформляй свои мысли об играх.",
+      "shareCards": "Делись карточками",
+      "shareCardsDesc": "Генерируй красивые PNG-карточки с оценкой, отзывом и обложкой. Выбирай тему и настраивай видимость.",
+      "stats": "Статистика и аналитика",
+      "statsDesc": "Сколько игр пройдено, во что играешь сейчас — наглядная панель статистики.",
+      "rawgCatalog": "Каталог RAWG",
+      "rawgCatalogDesc": "Ищи игры в огромной базе RAWG. Обложки, жанры, даты выхода — подтягиваются автоматически."
+    },
+    "steps": {
+      "register": "Зарегистрируйся",
+      "registerDesc": "Создай аккаунт за 30 секунд. Нужен только email.",
+      "addGames": "Добавь игры",
+      "addGamesDesc": "Найди игру в каталоге RAWG — обложка и данные подтянутся автоматически.",
+      "rateAndShare": "Оценивай и делись",
+      "rateAndShareDesc": "Ставь оценки, пиши рецензии и делись красивыми карточками."
+    }
+  },
+
+  "home": {
+    "heroTitle1": "Твой Игровой",
+    "heroTitle2": "Путь Важен",
+    "heroSubtitle": "Не дай эпичным моментам исчезнуть. Отслеживай прогресс, пиши рецензии и создавай свою идеальную игровую библиотеку.",
+    "gamesTracked": "Игр отслежено",
+    "completed": "Пройдено",
+    "nowPlaying": "Сейчас играю",
+    "yourLibrary": "Твоя Игровая Библиотека",
+    "syncingLibrary": "Синхронизация библиотеки...",
+    "connectionError": "Ошибка подключения",
+    "emptyLibrary": "Ваша библиотека пуста",
+    "emptyLibraryDesc": "Каждое великое путешествие начинается с одной игры. Добавь свою первую игру и начни документировать свои приключения.",
+    "loadError": "Failed to load games. Please check your Supabase configuration."
+  },
+
+  "gameDetail": {
+    "gameNotFound": "Игра не найдена",
+    "loadError": "Не удалось загрузить игру",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту игру из дневника?",
+    "deleteError": "Не удалось удалить игру",
+    "loadingGame": "Загрузка данных об игре...",
+    "backToLibrary": "Назад в библиотеку",
+    "adding": "Добавление...",
+    "addToLibrary": "В мою библиотеку",
+    "signInAndAdd": "Войти и добавить",
+    "share": "Поделиться",
+    "detailedRating": "Ваша оценка (personal rating)",
+    "changeRating": "Изменить оценку по {count} критериям",
+    "rateByCategories": "Оценить по уникальным критериям",
+    "myReview": "Моя Рецензия / Заметки",
+    "removeFromDiary": "Удалить из дневника",
+    "addedToDiary": "Добавлена в дневник",
+    "lastUpdated": "Последнее обновление",
+    "screenshots": "Скриншоты"
+  },
+
+  "popular": {
+    "title": "Популярное на",
+    "brandName": "Vibe Diary",
+    "subtitle": "Игры, которые чаще всего добавляют и оценивают пользователи. Открой для себя что-то новое или убедись, что твои фавориты тоже в топе.",
+    "gamesInCatalog": "игр в каталоге",
+    "nothingYet": "Пока ничего нет",
+    "nothingYetDesc": "Здесь появятся игры, когда пользователи начнут добавлять и оценивать их на Vibe Diary.",
+    "heading": "Популярное на Vibe Diary",
+    "headingSubtitle": "Игры, которые чаще всего добавляют и оценивают"
+  },
+
+  "addGame": {
+    "backToVault": "Вернуться в хранилище",
+    "expandTitle": "Расширь свою",
+    "expandTitle2": "Коллекцию",
+    "subtitle": "Введи название, чтобы найти и добавить новые игры в свой личный дневник.",
+    "addError": "Не удалось добавить игру. Попробуйте ещё раз.",
+    "readyToDiscover": "Готов к открытиям?",
+    "rawgInfo": "Наша база данных подключена напрямую к RAWG для получения обложек и метаданных.",
+    "foundGames": "Найденные игры",
+    "results": "Результатов"
+  },
+
+  "auth": {
+    "passwordMismatch": "Пароли не совпадают.",
+    "accountCreatedConfirmEmail": "Аккаунт создан. Проверьте почту для подтверждения адреса перед входом.",
+    "accountCreatedReady": "Аккаунт создан. Вы можете начать использовать Vibe Diary.",
+    "accountTitle": "Аккаунт Vibe Diary",
+    "keepLibrarySafe": "Сохрани свою библиотеку,",
+    "ratingsAndProgress": "оценки и прогресс.",
+    "accountDescription": "Аккаунт хранит ваш дневник в безопасности и привязывает каждую игру, рецензию и профиль к вашей коллекции.",
+    "personalLibrary": "Личная библиотека привязана к вашему аккаунту.",
+    "progressTracking": "Отслеживание прогресса для авторизованного пользователя.",
+    "analyticsSharing": "Аналитика и шаринг на основе стабильных профилей.",
+    "signInTab": "Войти",
+    "createAccountTab": "Создать аккаунт",
+    "supabaseNotConfigured": "Добавьте Supabase URL и anon key в переменные окружения перед использованием аккаунтов.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "Пароль",
+    "passwordPlaceholder": "Минимум 6 символов",
+    "confirmPasswordLabel": "Подтвердите пароль",
+    "confirmPasswordPlaceholder": "Повторите пароль"
+  },
+
+  "adminPanel": {
+    "loadError": "Не удалось загрузить данные админ-панели.",
+    "loading": "Загрузка панели администратора...",
+    "badge": "Admin Control Center",
+    "subtitle": "Управление пользователями, ролями и коллекциями",
+    "accessNote": "Эта область доступна только аккаунтам с ролью",
+    "accessNoteRole": "admin",
+    "accessNoteSuffix": ". Здесь можно просматривать профили и назначать роли.",
+    "refreshing": "Обновление...",
+    "refresh": "Обновить данные",
+    "users": "Пользователи",
+    "admins": "Админы",
+    "gamesTracked": "Игр отслежено",
+    "completed": "Пройдено",
+    "role": "Роль",
+    "email": "Email",
+    "status": "Статус",
+    "confirmedInApp": "Подтверждён в приложении",
+    "usersAndRoles": "Пользователи и роли",
+    "searchByEmail": "Поиск по email...",
+    "allRoles": "Все роли",
+    "adminsOnly": "Только админы",
+    "usersOnly": "Только пользователи",
+    "games": "Игры",
+    "rated": "Оценено",
+    "action": "Действие",
+    "currentSession": "Текущая сессия",
+    "currentAdmin": "Текущий админ",
+    "makeUser": "Сделать пользователем",
+    "makeAdmin": "Сделать админом",
+    "gameModeration": "Модерация игр",
+    "searchGames": "Поиск по названию игры или email владельца...",
+    "owner": "Владелец:",
+    "noGamesYet": "Игр пока нет.",
+    "deleteGameConfirm": "Удалить эту игру из базы данных для её владельца?",
+    "unknownUser": "Unknown user",
+    "updating": "Обновление..."
+  },
+
+  "gameGrid": {
+    "noGamesYet": "Игр пока нет",
+    "addFirstGame": "Добавь свою первую игру в дневник",
+    "showing": "Отображается",
+    "ofTracked": "Из {count} отслеженных игр",
+    "personalRatings": "Личные оценки",
+    "avgScore": "Средняя {score} / 10",
+    "noRatingsYet": "Оценок пока нет",
+    "favorites": "Избранное",
+    "pinnedForQuickAccess": "Закреплено для быстрого доступа",
+    "libraryView": "Вид библиотеки",
+    "entireCollection": "Вся коллекция",
+    "allStatuses": "Все статусы",
+    "searchPlaceholder": "Поиск по библиотеке по названию, жанру или статусу...",
+    "filters": "Фильтры",
+    "sortNewest": "Сначала новые",
+    "sortOldest": "Сначала старые",
+    "sortByRating": "По оценке",
+    "sortByName": "По названию (А-Я)",
+    "sortByStatus": "По статусу",
+    "all": "Все",
+    "withRating": "С оценкой",
+    "withoutRating": "Без оценки",
+    "statusFilter": "Статус",
+    "showingOf": "Показано {shown} из {total} игр",
+    "searchLabel": "Поиск:",
+    "collectionLabel": "Коллекция:",
+    "statusLabel": "Статус:",
+    "nothingFound": "Ничего не найдено",
+    "tryChangingFilters": "Попробуйте изменить поиск, фильтр коллекции или статус."
+  },
+
+  "searchBar": {
+    "placeholder": "Найти игру...",
+    "searching": "Поиск...",
+    "search": "Найти"
+  },
+
+  "searchResults": {
+    "searching": "Поиск игр...",
+    "noResults": "Игры не найдены. Попробуйте другой запрос.",
+    "released": "Вышла:",
+    "added": "Добавлено",
+    "add": "Добавить"
+  },
+
+  "reviewEditor": {
+    "titleLabel": "Заголовок рецензии",
+    "titlePlaceholder": "Например: Отличная игра, но с плохой оптимизацией...",
+    "pros": "Плюсы",
+    "addPro": "Добавить плюс...",
+    "cons": "Минусы",
+    "addCon": "Добавить минус...",
+    "notesLabel": "Развернутое мнение (необязательно)",
+    "notesPlaceholder": "Распиши свои мысли о сюжете, геймплее, и общем впечатлении...",
+    "saving": "Сохранение...",
+    "saved": "Сохранено!",
+    "saveReview": "Сохранить рецензию"
+  },
+
+  "ratingSelector": {
+    "gameplay": "Геймплей",
+    "gameplayDesc": "Механики, управление, баланс",
+    "visuals": "Визуал",
+    "visualsDesc": "Графика, стиль, анимации",
+    "atmosphere": "Атмосфера",
+    "atmosphereDesc": "Мир, погружение, сеттинг",
+    "sound": "Звук",
+    "soundDesc": "Музыка, эффекты, озвучка",
+    "technical": "Техника",
+    "technicalDesc": "Стабильность, оптимизация",
+    "content": "Контент",
+    "contentDesc": "Объём, реиграбельность",
+    "impression": "Впечатление",
+    "impressionDesc": "Личные эмоции, послевкусие",
+    "story": "Сюжет",
+    "storyDesc": "Нарратив, персонажи, развязка",
+    "presetMasterpiece": "Шедевр",
+    "presetExcellent": "Отлично",
+    "presetGood": "Хорошо",
+    "presetMediocre": "Средне",
+    "presetWeak": "Слабо",
+    "detailPanel": "Детализация",
+    "detailPanelDesc": "Настройте каждый аспект игры",
+    "quickPresets": "Быстрые пресеты",
+    "storyActive": "Сюжетная игра — критерий «Сюжет» активен",
+    "saveToDiary": "Сохранить в дневник",
+    "levelExcellent": "Великолепно",
+    "levelGreat": "Отлично",
+    "levelGood": "Хорошо",
+    "levelOk": "Нормально",
+    "levelWeak": "Слабо",
+    "levelNone": "Не оценено",
+    "scoreMasterpiece": "Шедевр",
+    "scoreExcellent": "Отлично",
+    "scoreGood": "Хорошо",
+    "scoreDecent": "Неплохо",
+    "scoreAcceptable": "Приемлемо",
+    "scoreWeak": "Слабо"
+  },
+
+  "status": {
+    "label": "Статус",
+    "notStarted": "Не начата",
+    "playing": "Играю",
+    "completed": "Пройдена",
+    "abandoned": "Заброшена"
+  },
+
+  "gameInfo": {
+    "rawgRating": "RAWG Рейтинг",
+    "metacritic": "Metacritic",
+    "avgPlaytime": "Ср. время игры",
+    "achievements": "Достижения",
+    "aboutGame": "Об игре",
+    "developers": "Разработчики",
+    "publishers": "Издатели",
+    "platforms": "Платформы",
+    "releaseDate": "Дата выхода",
+    "ratings": "Оценки",
+    "reviews": "Обзоры",
+    "officialSite": "Официальный сайт"
+  },
+
+  "similarGames": {
+    "title": "Похожие игры",
+    "noImage": "Нет изображения"
+  },
+
+  "communityRating": {
+    "title": "Оценка сообщества",
+    "ratingOne": "оценка",
+    "ratingFew": "оценки",
+    "ratingMany": "оценок",
+    "gameplay": "Геймплей",
+    "visuals": "Визуал",
+    "atmosphere": "Атмосфера",
+    "sound": "Звук",
+    "technical": "Техника",
+    "content": "Контент",
+    "impression": "Впечатление",
+    "story": "Сюжет"
+  },
+
+  "communityDiscussions": {
+    "title": "Комьюнити & Советы",
+    "subtitle": "Самые интересные обсуждения Reddit об этой игре.",
+    "fallbackText": "Нажми, чтобы прочитать обсуждение на Reddit."
+  },
+
+  "screenshotGallery": {
+    "title": "Скриншоты",
+    "altText": "Скриншот {index}"
+  },
+
+  "steamDeck": {
+    "verified": "Проверено",
+    "playable": "Играбельно",
+    "unsupported": "Не поддерживается",
+    "unknown": "Неизвестно",
+    "title": "Компаньон Steam Deck",
+    "settingsVault": "Хранилище настроек",
+    "deckCompatibility": "Совместимость с Deck",
+    "settingsLabel": "Настройки (TDP, Proton, FSR)",
+    "settingsPlaceholder": "напр. Proton GE 8-3, TDP Limit 10W, 40 FPS / 40 Hz...",
+    "syncing": "синхронизация...",
+    "savedToCloud": "сохранено в облако",
+    "applySettings": "применить настройки"
+  },
+
+  "shareModal": {
+    "themeDark": "Тёмная",
+    "themeMidnight": "Полночь",
+    "themeAmoled": "AMOLED",
+    "settings": "Настройка",
+    "cardTheme": "Тема карточки",
+    "visibility": "Видимость",
+    "showCover": "Обложка",
+    "showRating": "Личная оценка",
+    "showReview": "Мой отзыв",
+    "showGenres": "Жанры и дата",
+    "showStatus": "Статус",
+    "showPlaytime": "Время игры",
+    "showMetacritic": "Metacritic",
+    "showRawg": "RAWG",
+    "generating": "Создание...",
+    "exportPng": "Экспорт PNG",
+    "exportHint": "HD PNG • 3x разрешение",
+    "detailedRating": "Детальная оценка",
+    "prosTitle": "✦ Плюсы",
+    "consTitle": "✦ Минусы",
+    "opinion": "Мнение",
+    "rateGamesOn": "Оценивай игры на",
+    "scoreMasterpiece": "Шедевр",
+    "scoreExcellent": "Отлично",
+    "scoreGood": "Хорошо",
+    "scoreDecent": "Неплохо",
+    "scoreWeak": "Слабо"
+  },
+
+  "noteEditor": {
+    "placeholder": "Напишите свои заметки здесь...",
+    "characters": "символов",
+    "saving": "Сохранение...",
+    "saved": "Сохранено",
+    "save": "Сохранить заметки"
+  },
+
+  "errorBoundary": {
+    "title": "Что-то пошло не так",
+    "description": "Попробуйте обновить страницу или свяжитесь с поддержкой, если проблема повторится.",
+    "refresh": "Обновить страницу"
+  },
+
+  "authGate": {
+    "notConfigured": "Supabase не настроен",
+    "notConfiguredDesc": "Для работы аккаунтов требуются NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY в переменных окружения.",
+    "checkingAccount": "Проверяем ваш аккаунт...",
+    "adminRequired": "Требуется доступ администратора",
+    "adminRequiredDesc": "Эта область доступна только для аккаунтов с ролью админ."
+  },
+
+  "demo": {
+    "badge": "Попробуй прямо сейчас",
+    "title": "Загляни внутрь",
+    "subtitle": "Посмотри, как выглядит твой будущий игровой дневник. Всё это — бесплатно и без ограничений.",
+    "interactivePreview": "Интерактивное превью",
+    "cta": "Создать свой дневник",
+    "tabs": {
+      "library": "Библиотека",
+      "ratings": "Оценки",
+      "review": "Рецензия",
+      "share": "Карточка",
+      "stats": "Статистика"
+    },
+    "library": {
+      "tracked": "Отслежено",
+      "completed": "Пройдено",
+      "playing": "Играю"
+    },
+    "status": {
+      "Not Started": "Не начата",
+      "Playing": "Играю",
+      "Completed": "Пройдена",
+      "Abandoned": "Заброшена"
+    },
+    "ratings": {
+      "gameplay": "Геймплей",
+      "visuals": "Визуал",
+      "atmosphere": "Атмосфера",
+      "sound": "Звук",
+      "story": "Сюжет",
+      "technical": "Техническая часть",
+      "content": "Контент",
+      "impression": "Впечатление",
+      "dragHint": "Двигай ползунки, чтобы увидеть, как меняется оценка в реальном времени"
+    },
+    "review": {
+      "titleLabel": "Заголовок рецензии",
+      "sampleTitle": "Лучшая RPG десятилетия",
+      "pros": "Плюсы",
+      "cons": "Минусы",
+      "pro1": "Невероятно проработанный открытый мир",
+      "pro2": "Глубокие квесты с нелинейными решениями",
+      "pro3": "Атмосферный саундтрек и озвучка",
+      "con1": "Управление Плотвой иногда разочаровывает",
+      "con2": "Редкие просадки FPS в городах",
+      "notesLabel": "Личные заметки",
+      "sampleNotes": "Одна из тех игр, которые меняют стандарты жанра. После Ведьмака 3 сложно воспринимать другие RPG так же."
+    },
+    "share": {
+      "masterpiece": "Шедевр",
+      "completed": "Пройдена"
+    },
+    "stats": {
+      "byStatus": "Игры по статусам",
+      "completed": "Пройдено",
+      "playing": "Играю",
+      "notStarted": "Не начато",
+      "abandoned": "Заброшено",
+      "totalGames": "Всего игр",
+      "avgScore": "Средний балл",
+      "topGenre": "Любимый жанр"
+    }
+  }
+}

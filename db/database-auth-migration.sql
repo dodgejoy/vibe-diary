@@ -12,11 +12,11 @@ DECLARE
 BEGIN
   SELECT id INTO target_user_id
   FROM auth.users
-  WHERE email = 'sayrisshow@gmail.com'
+  WHERE email = 'YROUR_EMAIL_HEE'
   LIMIT 1;
 
   IF target_user_id IS NULL THEN
-    RAISE EXCEPTION 'No auth user found for email sayrisshow@gmail.com';
+    RAISE EXCEPTION 'No auth user found for email YOUR_EMAIL_HERE';
   END IF;
 
   ALTER TABLE public.games

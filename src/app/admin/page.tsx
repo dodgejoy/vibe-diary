@@ -11,6 +11,7 @@ import {
   type UserProfile,
   updateUserRole,
 } from '@/lib/supabase';
+import { useTranslation } from '@/i18n';
 
 type UserSummary = UserProfile & {
   gameCount: number;
@@ -20,6 +21,7 @@ type UserSummary = UserProfile & {
 
 export default function AdminPage() {
   const { profile, user } = useAuth();
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +51,7 @@ export default function AdminPage() {
       setGames(gameRows);
     } catch (loadError) {
       console.error(loadError);
-      setError('Не удалось загрузить данные админ-панели.');
+      setError(t('adminPanel.loadError'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -122,7 +124,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteGame = async (gameId: string) => {
-    const confirmed = confirm('Удалить эту игру из базы данных для её владельца?');
+    const confirmed = confirm(t('adminPanel.deleteGameConfirm'));
     if (!confirmed) {
       return;
     }
@@ -146,7 +148,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-16">
         <div className="flex flex-col items-center gap-4 text-center">
           <Loader className="animate-spin text-amber-400" size={34} />
-          <p className="text-slate-300 font-semibold">Загрузка панели администратора...</p>
+          <p className="text-slate-300 font-semibold">{t('adminPanel.loading')}</p>
         </div>
       </div>
     );
@@ -162,9 +164,9 @@ export default function AdminPage() {
               <Shield size={18} />
               Admin Control Center
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white mb-3">Управление пользователями, ролями и коллекциями</h1>
+            <h1 className="text-4xl font-black tracking-tight text-white mb-3">{t('adminPanel.subtitle')}</h1>
             <p className="text-slate-400 max-w-2xl leading-relaxed">
-              Эта область доступна только аккаунтам с ролью <span className="text-slate-200 font-semibold">admin</span>. Здесь можно просматривать профили и назначать роли.
+              {t('adminPanel.accessNote')} <span className="text-slate-200 font-semibold">{t('adminPanel.accessNoteRole')}</span>{t('adminPanel.accessNoteSuffix')}
             </p>
             <div className="mt-6">
               <button
@@ -173,7 +175,7 @@ export default function AdminPage() {
                 className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-slate-200 hover:text-white hover:bg-slate-800 transition-all disabled:opacity-60"
               >
                 <RefreshCcw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                {isRefreshing ? 'Обновление...' : 'Обновить данные'}
+                {isRefreshing ? t('adminPanel.refreshing') : t('adminPanel.refresh')}
               </button>
             </div>
           </div>
@@ -189,28 +191,28 @@ export default function AdminPage() {
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Users size={16} className="text-violet-400" />
-              Пользователи
+              {t('adminPanel.users')}
             </div>
             <div className="text-3xl font-extrabold text-white">{totalUsers}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Crown size={16} className="text-amber-400" />
-              Админы
+              {t('adminPanel.admins')}
             </div>
             <div className="text-3xl font-extrabold text-amber-300">{totalAdmins}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Gamepad2 size={16} className="text-sky-400" />
-              Игр отслежено
+              {t('adminPanel.gamesTracked')}
             </div>
             <div className="text-3xl font-extrabold text-white">{totalGames}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Gamepad2 size={16} className="text-emerald-400" />
-              Пройдено
+              {t('adminPanel.completed')}
             </div>
             <div className="text-3xl font-extrabold text-emerald-300">{totalCompletedGames}</div>
           </div>
@@ -218,7 +220,7 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="text-slate-400 text-sm mb-2">Роль</div>
+            <div className="text-slate-400 text-sm mb-2">{t('adminPanel.role')}</div>
             <div className="text-2xl font-extrabold text-amber-300 uppercase">{profile?.role ?? 'unknown'}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
@@ -226,10 +228,10 @@ export default function AdminPage() {
             <div className="text-lg font-bold text-white break-all">{profile?.email || user?.email || 'unknown'}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="text-slate-400 text-sm mb-2">Статус</div>
+            <div className="text-slate-400 text-sm mb-2">{t('adminPanel.status')}</div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-300 font-semibold">
               <Star size={14} />
-              Подтверждён в приложении
+              {t('adminPanel.confirmedInApp')}
             </div>
           </div>
         </div>
@@ -237,7 +239,7 @@ export default function AdminPage() {
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 overflow-hidden">
           <div className="flex items-center gap-3 mb-5 text-white font-bold text-xl">
             <UserCircle2 size={20} className="text-violet-400" />
-            Пользователи и роли
+            {t('adminPanel.usersAndRoles')}
           </div>
 
           <div className="flex flex-col md:flex-row gap-3 mb-5">
@@ -246,7 +248,7 @@ export default function AdminPage() {
               <input
                 value={userSearch}
                 onChange={(event) => setUserSearch(event.target.value)}
-                placeholder="Поиск по email..."
+                placeholder={t('adminPanel.searchByEmail')}
                 className="w-full rounded-2xl border border-white/10 bg-slate-950/60 pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -255,9 +257,9 @@ export default function AdminPage() {
               onChange={(event) => setRoleFilter(event.target.value as 'all' | 'admin' | 'user')}
               className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white focus:outline-none focus:border-violet-500"
             >
-              <option value="all">Все роли</option>
-              <option value="admin">Только админы</option>
-              <option value="user">Только пользователи</option>
+              <option value="all">{t('adminPanel.allRoles')}</option>
+              <option value="admin">{t('adminPanel.adminsOnly')}</option>
+              <option value="user">{t('adminPanel.usersOnly')}</option>
             </select>
           </div>
 
@@ -267,10 +269,10 @@ export default function AdminPage() {
                 <tr className="text-left text-slate-400 border-b border-white/10">
                   <th className="pb-3 font-semibold">Email</th>
                   <th className="pb-3 font-semibold">Role</th>
-                  <th className="pb-3 font-semibold">Игры</th>
-                  <th className="pb-3 font-semibold">Пройдено</th>
-                  <th className="pb-3 font-semibold">Оценено</th>
-                  <th className="pb-3 font-semibold">Действие</th>
+                  <th className="pb-3 font-semibold">{t('adminPanel.games')}</th>
+                  <th className="pb-3 font-semibold">{t('adminPanel.completed')}</th>
+                  <th className="pb-3 font-semibold">{t('adminPanel.rated')}</th>
+                  <th className="pb-3 font-semibold">{t('adminPanel.action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -283,7 +285,7 @@ export default function AdminPage() {
                       <td className="py-4 pr-4">
                         <div className="font-medium text-white break-all">{profileItem.email}</div>
                         {isCurrentAdmin && (
-                          <div className="text-xs text-slate-500 mt-1">Текущая сессия</div>
+                          <div className="text-xs text-slate-500 mt-1">{t('adminPanel.currentSession')}</div>
                         )}
                       </td>
                       <td className="py-4 pr-4">
@@ -309,10 +311,10 @@ export default function AdminPage() {
                           }`}
                         >
                           {updatingRoleId === profileItem.user_id
-                            ? 'Обновление...'
+                            ? t('adminPanel.updating')
                             : profileItem.role === 'admin'
-                            ? (isCurrentAdmin ? 'Текущий админ' : 'Сделать пользователем')
-                            : 'Сделать админом'}
+                            ? (isCurrentAdmin ? t('adminPanel.currentAdmin') : t('adminPanel.makeUser'))
+                            : t('adminPanel.makeAdmin')}
                         </button>
                       </td>
                     </tr>
@@ -326,7 +328,7 @@ export default function AdminPage() {
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
           <div className="flex items-center gap-3 mb-5 text-white font-bold text-xl">
             <Gamepad2 size={20} className="text-sky-400" />
-            Модерация игр
+            {t('adminPanel.gameModeration')}
           </div>
 
           <div className="relative mb-5">
@@ -334,20 +336,20 @@ export default function AdminPage() {
             <input
               value={gameSearch}
               onChange={(event) => setGameSearch(event.target.value)}
-              placeholder="Поиск по названию игры или email владельца..."
+              placeholder={t('adminPanel.searchGames')}
               className="w-full rounded-2xl border border-white/10 bg-slate-950/60 pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
 
           <div className="space-y-3">
             {filteredGames.length === 0 ? (
-              <div className="text-slate-500">Игр пока нет.</div>
+              <div className="text-slate-500">{t('adminPanel.noGamesYet')}</div>
             ) : (
               filteredGames.map((game) => (
                 <div key={game.id} className="rounded-2xl border border-white/5 bg-slate-950/50 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <div className="font-semibold text-white">{game.title}</div>
-                    <div className="text-sm text-slate-500">Владелец: {game.ownerEmail}</div>
+                    <div className="text-sm text-slate-500">{t('adminPanel.owner')}: {game.ownerEmail}</div>
                   </div>
                   <div className="flex items-center gap-3 text-sm flex-wrap">
                     <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-slate-300">
@@ -355,7 +357,7 @@ export default function AdminPage() {
                     </span>
                     {game.detailed_ratings && (
                       <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
-                        Оценено
+                        {t('adminPanel.rated')}
                       </span>
                     )}
                     <button
@@ -364,7 +366,7 @@ export default function AdminPage() {
                       className="inline-flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-1.5 text-rose-200 hover:bg-rose-500/20 transition-all disabled:opacity-50"
                     >
                       <Trash2 size={14} />
-                      {deletingGameId === game.id ? 'Удаление...' : 'Удалить'}
+                      {deletingGameId === game.id ? t('common.deleting') : t('common.delete')}
                     </button>
                   </div>
                 </div>

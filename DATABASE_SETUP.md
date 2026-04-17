@@ -23,7 +23,7 @@ If you're setting up Game Diary for the first time, follow these steps:
 ### 3. Create Database Schema
 1. Go to Supabase **SQL Editor**
 2. Click **New Query**
-3. Copy entire content from `database-schema.sql`
+3. Copy entire content from `db/database-schema.sql`
 4. Paste into editor
 5. Click **Run**
 
@@ -225,7 +225,7 @@ supabase db download > backup.sql
 1. Check schema creation ran successfully
 2. In Supabase, go to **SQL Editor**
 3. Run: `SELECT * FROM public.games;`
-4. If it fails, delete the table and re-run database-schema.sql
+4. If it fails, delete the table and re-run db/database-schema.sql
 
 ### Issue: "permission denied for schema public"
 **Solution**:
@@ -336,7 +336,7 @@ WHERE tablename = 'games';
 
 ### If Schema Gets Accidentally Modified
 ```sql
--- Restore from database-schema.sql
+-- Restore from db/database-schema.sql
 -- Add new columns only, don't drop existing data:
 ALTER TABLE games ADD COLUMN IF NOT EXISTS [column_name] [type];
 ```
@@ -347,10 +347,10 @@ ALTER TABLE games ADD COLUMN IF NOT EXISTS [column_name] [type];
 
 - [Supabase Database Documentation](https://supabase.com/docs/guides/database)
 - [PostgreSQL Basics](https://www.postgresql.org/docs/current/)
-- [Game Diary Database Schema](./database-schema.sql)
+- [Game Diary Database Schema](./db/database-schema.sql)
 - [Supabase CLI Reference](https://supabase.com/docs/reference/cli)
 
 ---
 
 **Last Updated**: Current Session
-**For Issues**: Check QUICK-START.md Troubleshooting section
+**For Issues**: Check README.md Troubleshooting section

@@ -6,6 +6,7 @@ import { Game, getNormalizedScore } from '@/lib/supabase';
 import { StatusBadge } from './StatusBadge';
 import { Heart, Star } from 'lucide-react';
 import { useState, useRef, useCallback, memo } from 'react';
+import { useTranslation } from '@/i18n';
 
 interface GameCard3DProps {
   game: Game;
@@ -15,6 +16,7 @@ interface GameCard3DProps {
 
 export const GameCard3D = memo(function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameCard3DProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -50,12 +52,12 @@ export const GameCard3D = memo(function GameCard3D({ game, isFavorite = false, o
   };
 
   const getScoreLabel = (score: number) => {
-    if (score >= 85) return 'Шедевр';
-    if (score >= 75) return 'Отлично';
-    if (score >= 65) return 'Хорошо';
-    if (score >= 55) return 'Неплохо';
-    if (score >= 40) return 'Приемлемо';
-    return 'Слабо';
+    if (score >= 85) return t('ratingSelector.scoreMasterpiece');
+    if (score >= 75) return t('ratingSelector.scoreExcellent');
+    if (score >= 65) return t('ratingSelector.scoreGood');
+    if (score >= 55) return t('ratingSelector.scoreDecent');
+    if (score >= 40) return t('ratingSelector.scoreAcceptable');
+    return t('ratingSelector.scoreWeak');
   };
 
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -135,7 +137,7 @@ export const GameCard3D = memo(function GameCard3D({ game, isFavorite = false, o
               />
             ) : (
               <div className="flex items-center justify-center h-full bg-slate-800/50 text-slate-500">
-                <span className="text-sm font-medium tracking-widest uppercase">Нет обложки</span>
+                <span className="text-sm font-medium tracking-widest uppercase">{t('common.noImage')}</span>
               </div>
             )}
 

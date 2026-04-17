@@ -5,6 +5,7 @@ import { Game, getNormalizedScore, getMaxScore } from '@/lib/supabase';
 import { GameDetails } from '@/lib/rawg';
 import { X, Download, Eye, EyeOff, Layout, Palette } from 'lucide-react';
 import { toPng } from 'html-to-image';
+import { useTranslation } from '@/i18n';
 
 interface GameShareModalProps {
   game: Game;
@@ -17,7 +18,7 @@ type CardTheme = 'dark' | 'midnight' | 'amoled';
 
 const THEMES: Record<CardTheme, { name: string; bg: string; cardBg: string; surface: string; border: string; text: string; muted: string; accent: string }> = {
   dark: {
-    name: 'Тёмная',
+    name: 'dark',
     bg: '#0f172a',
     cardBg: '#0f172a',
     surface: 'rgba(30,41,59,0.5)',
@@ -27,7 +28,7 @@ const THEMES: Record<CardTheme, { name: string; bg: string; cardBg: string; surf
     accent: '#a78bfa',
   },
   midnight: {
-    name: 'Полночь',
+    name: 'midnight',
     bg: '#0c0a1a',
     cardBg: '#0c0a1a',
     surface: 'rgba(30,20,60,0.5)',
@@ -37,7 +38,7 @@ const THEMES: Record<CardTheme, { name: string; bg: string; cardBg: string; surf
     accent: '#c084fc',
   },
   amoled: {
-    name: 'AMOLED',
+    name: 'amoled',
     bg: '#000000',
     cardBg: '#000000',
     surface: 'rgba(20,20,20,0.8)',
@@ -48,7 +49,7 @@ const THEMES: Record<CardTheme, { name: string; bg: string; cardBg: string; surf
   },
 };
 
-const STATUS_LABELS: Record<string, string> = {
+const STATUS_LABELS_SHARE: Record<string, string> = {
   'Not Started': 'Не начата',
   'Playing': 'Играю',
   'Completed': 'Пройдена',
@@ -56,6 +57,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShareModalProps) {
+  const { t: tr } = useTranslation();
   const [showPersonalScore, setShowPersonalScore] = useState(true);
   const [showMetacritic, setShowMetacritic] = useState(true);
   const [showRawg, setShowRawg] = useState(true);
@@ -102,11 +104,11 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
   const maxScore = game.detailed_ratings ? getMaxScore(game.detailed_ratings) : null;
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return { text: '#facc15', border: 'rgba(234,179,8,0.3)', bg: 'rgba(234,179,8,0.15)', gradient: 'from-yellow-400 to-amber-500', label: 'Шедевр' };
-    if (score >= 70) return { text: '#34d399', border: 'rgba(16,185,129,0.3)', bg: 'rgba(16,185,129,0.15)', gradient: 'from-emerald-400 to-teal-500', label: 'Отлично' };
-    if (score >= 60) return { text: '#60a5fa', border: 'rgba(59,130,246,0.3)', bg: 'rgba(59,130,246,0.15)', gradient: 'from-blue-400 to-indigo-500', label: 'Хорошо' };
-    if (score >= 50) return { text: '#fb923c', border: 'rgba(249,115,22,0.3)', bg: 'rgba(249,115,22,0.15)', gradient: 'from-orange-400 to-red-500', label: 'Неплохо' };
-    return { text: '#fb7185', border: 'rgba(244,63,94,0.3)', bg: 'rgba(244,63,94,0.15)', gradient: 'from-rose-400 to-pink-500', label: 'Слабо' };
+    if (score >= 80) return { text: '#facc15', border: 'rgba(234,179,8,0.3)', bg: 'rgba(234,179,8,0.15)', gradient: 'from-yellow-400 to-amber-500', label: tr('shareModal.scoreMasterpiece') };
+    if (score >= 70) return { text: '#34d399', border: 'rgba(16,185,129,0.3)', bg: 'rgba(16,185,129,0.15)', gradient: 'from-emerald-400 to-teal-500', label: tr('shareModal.scoreExcellent') };
+    if (score >= 60) return { text: '#60a5fa', border: 'rgba(59,130,246,0.3)', bg: 'rgba(59,130,246,0.15)', gradient: 'from-blue-400 to-indigo-500', label: tr('shareModal.scoreGood') };
+    if (score >= 50) return { text: '#fb923c', border: 'rgba(249,115,22,0.3)', bg: 'rgba(249,115,22,0.15)', gradient: 'from-orange-400 to-red-500', label: tr('shareModal.scoreDecent') };
+    return { text: '#fb7185', border: 'rgba(244,63,94,0.3)', bg: 'rgba(244,63,94,0.15)', gradient: 'from-rose-400 to-pink-500', label: tr('shareModal.scoreWeak') };
   };
 
   const scoreStyle = totalScore !== null ? getScoreColor(totalScore) : null;
@@ -114,27 +116,27 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
 
   // Rating breakdown for the card
   const ratingCategories = game.detailed_ratings ? [
-    { key: 'gameplay', label: 'Геймплей', max: 20 },
-    { key: 'visuals', label: 'Визуал', max: 15 },
-    { key: 'atmosphere', label: 'Атмосфера', max: 15 },
-    { key: 'sound', label: 'Звук', max: 10 },
-    { key: 'technical', label: 'Техника', max: 10 },
-    { key: 'content', label: 'Контент', max: 10 },
-    { key: 'impression', label: 'Впечатление', max: 10 },
+    { key: 'gameplay', label: tr('ratingSelector.gameplay'), max: 20 },
+    { key: 'visuals', label: tr('ratingSelector.visuals'), max: 15 },
+    { key: 'atmosphere', label: tr('ratingSelector.atmosphere'), max: 15 },
+    { key: 'sound', label: tr('ratingSelector.sound'), max: 10 },
+    { key: 'technical', label: tr('ratingSelector.technical'), max: 10 },
+    { key: 'content', label: tr('ratingSelector.content'), max: 10 },
+    { key: 'impression', label: tr('ratingSelector.impression'), max: 10 },
     ...('story' in game.detailed_ratings && game.detailed_ratings.story !== undefined
-      ? [{ key: 'story', label: 'Сюжет', max: 15 }]
+      ? [{ key: 'story', label: tr('ratingSelector.story'), max: 15 }]
       : []),
   ] : [];
 
   const toggleItems = [
-    { label: 'Обложка', value: showCover, toggle: () => setShowCover(!showCover) },
-    { label: 'Личная оценка', value: showPersonalScore, toggle: () => setShowPersonalScore(!showPersonalScore) },
-    { label: 'Мой отзыв', value: showReview, toggle: () => setShowReview(!showReview) },
-    { label: 'Жанры и дата', value: showGenres, toggle: () => setShowGenres(!showGenres) },
-    { label: 'Статус', value: showStatus, toggle: () => setShowStatus(!showStatus) },
-    { label: 'Время игры', value: showPlaytime, toggle: () => setShowPlaytime(!showPlaytime) },
-    { label: 'Metacritic', value: showMetacritic, toggle: () => setShowMetacritic(!showMetacritic) },
-    { label: 'RAWG', value: showRawg, toggle: () => setShowRawg(!showRawg) },
+    { label: tr('shareModal.showCover'), value: showCover, toggle: () => setShowCover(!showCover) },
+    { label: tr('shareModal.showRating'), value: showPersonalScore, toggle: () => setShowPersonalScore(!showPersonalScore) },
+    { label: tr('shareModal.showReview'), value: showReview, toggle: () => setShowReview(!showReview) },
+    { label: tr('shareModal.showGenres'), value: showGenres, toggle: () => setShowGenres(!showGenres) },
+    { label: tr('shareModal.showStatus'), value: showStatus, toggle: () => setShowStatus(!showStatus) },
+    { label: tr('shareModal.showPlaytime'), value: showPlaytime, toggle: () => setShowPlaytime(!showPlaytime) },
+    { label: tr('shareModal.showMetacritic'), value: showMetacritic, toggle: () => setShowMetacritic(!showMetacritic) },
+    { label: tr('shareModal.showRawg'), value: showRawg, toggle: () => setShowRawg(!showRawg) },
   ];
 
   return (
@@ -156,7 +158,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
                 <Layout size={18} className="text-violet-500" />
-                Настройка
+                {tr('shareModal.settings')}
               </h2>
               <button
                 onClick={onClose}
@@ -170,7 +172,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
             <div className="mb-5">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block flex items-center gap-1.5">
                 <Palette size={12} />
-                Тема карточки
+                {tr('shareModal.cardTheme')}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {(Object.keys(THEMES) as CardTheme[]).map((key) => (
@@ -183,7 +185,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                         : 'bg-slate-950/50 border-white/5 text-slate-400 hover:text-white hover:border-white/10'
                     }`}
                   >
-                    {THEMES[key].name}
+                    {tr(`shareModal.theme${key.charAt(0).toUpperCase()}${key.slice(1)}`)}
                   </button>
                 ))}
               </div>
@@ -191,7 +193,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
 
             {/* Visibility toggles */}
             <div className="space-y-1.5 mb-6">
-              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Видимость</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">{tr('shareModal.visibility')}</label>
               {toggleItems.map((item) => (
                 <button
                   key={item.label}
@@ -216,16 +218,16 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                 className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 bg-white text-slate-950 hover:bg-slate-100 font-black rounded-2xl transition-all active:scale-95 shadow-xl shadow-white/5 disabled:opacity-50 text-sm"
               >
                 {isGenerating ? (
-                  <span className="animate-pulse">Создание...</span>
+                  <span className="animate-pulse">{tr('shareModal.generating')}</span>
                 ) : (
                   <>
                     <Download size={18} strokeWidth={3} />
-                    Экспорт PNG
+                    {tr('shareModal.exportPng')}
                   </>
                 )}
               </button>
               <p className="text-center text-[10px] text-slate-500 font-bold uppercase tracking-tighter mt-3">
-                HD PNG • 3x разрешение
+                HD PNG • 3x {tr('shareModal.exportHint').split('•')[1]?.trim() || 'разрешение'}
               </p>
             </div>
           </div>
@@ -414,7 +416,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                           borderRadius: '10px',
                         }}>
                           <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: game.status === 'Completed' ? '#34d399' : game.status === 'Playing' ? '#a78bfa' : game.status === 'Abandoned' ? '#fb7185' : '#94a3b8' }} />
-                          <span style={{ fontSize: '11px', fontWeight: 700, color: t.text }}>{STATUS_LABELS[game.status] || game.status}</span>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: t.text }}>{STATUS_LABELS_SHARE[game.status] || game.status}</span>
                         </div>
                       )}
                       {showPlaytime && gameDetails?.playtime && (
@@ -443,7 +445,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                       marginBottom: '16px',
                     }}>
                       <div style={{ fontSize: '10px', fontWeight: 900, color: t.muted, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '12px' }}>
-                        Детальная оценка
+                        {tr('shareModal.detailedRating')}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {ratingCategories.map((cat) => {
@@ -490,7 +492,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                               borderRadius: '12px',
                             }}>
                               <div style={{ fontSize: '9px', fontWeight: 900, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>
-                                ✦ Плюсы
+                                {tr('shareModal.prosTitle')}
                               </div>
                               {game.pros.slice(0, 3).map((p, i) => (
                                 <div key={i} style={{
@@ -513,7 +515,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                               borderRadius: '12px',
                             }}>
                               <div style={{ fontSize: '9px', fontWeight: 900, color: '#fb7185', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '8px' }}>
-                                ✦ Минусы
+                                {tr('shareModal.consTitle')}
                               </div>
                               {game.cons.slice(0, 3).map((c, i) => (
                                 <div key={i} style={{
@@ -541,7 +543,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                           position: 'relative',
                         }}>
                           <div style={{ fontSize: '9px', fontWeight: 900, color: t.muted, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '6px' }}>
-                            Мнение
+                            {tr('shareModal.opinion')}
                           </div>
                           <p style={{
                             fontSize: '11px',
@@ -573,7 +575,7 @@ export function GameShareModal({ game, gameDetails, isOpen, onClose }: GameShare
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '8px', fontWeight: 900, color: t.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                        Оценивай игры на <span style={{ color: t.accent }}>Vibe Diary</span>
+                        {tr('shareModal.rateGamesOn')} <span style={{ color: t.accent }}>Vibe Diary</span>
                       </span>
                     </div>
 

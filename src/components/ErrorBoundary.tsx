@@ -2,6 +2,7 @@
 
 import { useState, useEffect, ReactNode } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -30,15 +31,23 @@ export function ErrorBoundary({
   }, [onError]);
 
   if (hasError) {
-    return fallback || (
+    return fallback || <ErrorFallback error={error} />;
+  }
+
+  return <>{children}</>;
+}
+
+function ErrorFallback({ error }: { error: Error | null }) {
+  const { t } = useTranslation();
+  return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-8 max-w-md text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-red-300 mb-2">
-            Что-то пошло не так
+            {t('errorBoundary.title')}
           </h2>
           <p className="text-red-200/70 text-sm mb-4">
-            Попробуйте обновить страницу или свяжитесь с поддержкой, если проблема повторится.
+            {t('errorBoundary.description')}
           </p>
           {error && (
             <p className="text-red-200/50 text-xs font-mono mb-4">
@@ -49,12 +58,9 @@ export function ErrorBoundary({
             onClick={() => window.location.reload()}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
           >
-            Обновить страницу
+            {t('errorBoundary.refresh')}
           </button>
         </div>
       </div>
-    );
-  }
-
-  return <>{children}</>;
+  );
 }
