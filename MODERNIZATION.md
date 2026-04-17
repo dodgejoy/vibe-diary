@@ -2,7 +2,7 @@
 
 ## ✅ Completed Improvements (Latest Session)
 
-### 1. Code Cleanup
+### 1. Code Cleanups
 - ✅ Removed legacy `RatingSelector` component (replaced by `DetailedRatingSelector`)
 - ✅ Removed unused `rating` field from Game type
 - ✅ Cleaned up database schema (removed `rating INTEGER` column)
