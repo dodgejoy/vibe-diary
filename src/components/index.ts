@@ -15,10 +15,10 @@ export { ScreenshotGallery } from './ScreenshotGallery';
 export { GameInfoPanel } from './GameInfoPanel';
 export { SimilarGames } from './SimilarGames';
 export { ErrorBoundary } from './ErrorBoundary';
-export { AchievementBadge, AchievementGrid, AchievementShowcase } from './AchievementBadge';
-export { AchievementsDisplay } from './AchievementsDisplay';
+
 export { ReviewEditor } from './ReviewEditor';
 export { CommunityDiscussions } from './CommunityDiscussions';
 export { GameScratchpad } from './GameScratchpad';
 export { SteamDeckCompanion } from './SteamDeckCompanion';
 export { GameShareModal } from './GameShareModal';
+export { PopularGames } from './PopularGames';

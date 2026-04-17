@@ -35,10 +35,10 @@ export function ErrorBoundary({
         <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-8 max-w-md text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-red-300 mb-2">
-            Something went wrong
+            Что-то пошло не так
           </h2>
           <p className="text-red-200/70 text-sm mb-4">
-            Please try refreshing the page or contact support if the problem persists.
+            Попробуйте обновить страницу или свяжитесь с поддержкой, если проблема повторится.
           </p>
           {error && (
             <p className="text-red-200/50 text-xs font-mono mb-4">
@@ -49,7 +49,7 @@ export function ErrorBoundary({
             onClick={() => window.location.reload()}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition"
           >
-            Refresh Page
+            Обновить страницу
           </button>
         </div>
       </div>

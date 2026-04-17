@@ -13,14 +13,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   const isAuthRoute = pathname === '/auth';
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isPublicRoute = isAuthRoute || pathname === '/popular' || pathname === '/' || pathname?.startsWith('/games/');
 
   useEffect(() => {
-    if (!isAuthRoute && !isLoading && isConfigured && !user) {
+    if (!isPublicRoute && !isLoading && isConfigured && !user) {
       router.replace(`/auth?next=${encodeURIComponent(pathname || '/')}`);
     }
-  }, [isAuthRoute, isConfigured, isLoading, pathname, router, user]);
+  }, [isPublicRoute, isConfigured, isLoading, pathname, router, user]);
 
-  if (isAuthRoute) {
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 
@@ -31,10 +32,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-6">
             <ShieldAlert size={28} />
           </div>
-          <h1 className="text-3xl font-extrabold text-white mb-3">Supabase is not configured</h1>
+          <h1 className="text-3xl font-extrabold text-white mb-3">Supabase не настроен</h1>
           <p className="text-slate-400 leading-relaxed">
-            Accounts require <span className="text-slate-200 font-semibold">NEXT_PUBLIC_SUPABASE_URL</span> and
-            <span className="text-slate-200 font-semibold"> NEXT_PUBLIC_SUPABASE_ANON_KEY</span> in your environment.
+            Для работы аккаунтов требуются <span className="text-slate-200 font-semibold">NEXT_PUBLIC_SUPABASE_URL</span> и
+            <span className="text-slate-200 font-semibold"> NEXT_PUBLIC_SUPABASE_ANON_KEY</span> в переменных окружения.
           </p>
         </div>
       </div>
@@ -47,11 +48,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col items-center gap-4 text-center">
           <Loader className="animate-spin text-violet-400" size={32} />
           <div className="space-y-2">
-            <p className="text-white font-semibold">Checking your account...</p>
+            <p className="text-white font-semibold">Проверяем ваш аккаунт...</p>
             {!isLoading && !user && (
               <Link href="/auth" className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors">
                 <LockKeyhole size={16} />
-                Open sign in
+                Войти
               </Link>
             )}
           </div>
@@ -67,9 +68,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 mb-6">
             <ShieldX size={28} />
           </div>
-          <h1 className="text-3xl font-extrabold text-white mb-3">Admin access required</h1>
+          <h1 className="text-3xl font-extrabold text-white mb-3">Требуется доступ администратора</h1>
           <p className="text-slate-400 leading-relaxed">
-            This area is visible only for accounts with the <span className="text-slate-200 font-semibold">admin</span> role.
+            Эта область доступна только для аккаунтов с ролью <span className="text-slate-200 font-semibold">админ</span>.
           </p>
         </div>
       </div>

@@ -3,6 +3,21 @@ import axios from 'axios';
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY || '';
 
+// Simple in-memory cache to avoid redundant API calls
+const cache = new Map<string, { data: unknown; ts: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached<T>(key: string): T | undefined {
+  const entry = cache.get(key);
+  if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data as T;
+  if (entry) cache.delete(key);
+  return undefined;
+}
+
+function setCache(key: string, data: unknown) {
+  cache.set(key, { data, ts: Date.now() });
+}
+
 export type RawgGame = {
   id: number;
   name: string;
@@ -41,6 +56,10 @@ export async function searchGames(query: string): Promise<RawgGame[]> {
       return getMockGames(query);
     }
 
+    const cacheKey = `search:${query}`;
+    const cached = getCached<RawgGame[]>(cacheKey);
+    if (cached) return cached;
+
     const response = await axios.get(`${RAWG_BASE_URL}/games`, {
       params: {
         key: RAWG_API_KEY,
@@ -49,7 +68,9 @@ export async function searchGames(query: string): Promise<RawgGame[]> {
       },
     });
 
-    return response.data.results || [];
+    const results = response.data.results || [];
+    setCache(cacheKey, results);
+    return results;
   } catch (error) {
     console.error('Error searching games:', error);
     return getMockGames(query);
@@ -63,12 +84,17 @@ export async function getGameDetails(id: number): Promise<GameDetails | null> {
       return null;
     }
 
+    const cacheKey = `details:${id}`;
+    const cached = getCached<GameDetails>(cacheKey);
+    if (cached) return cached;
+
     const response = await axios.get(`${RAWG_BASE_URL}/games/${id}`, {
       params: {
         key: RAWG_API_KEY,
       },
     });
 
+    setCache(cacheKey, response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching game details:', error);
@@ -83,6 +109,10 @@ export async function getGameScreenshots(id: number): Promise<GameDetails['scree
       return [];
     }
 
+    const cacheKey = `screenshots:${id}`;
+    const cached = getCached<GameDetails['screenshots']>(cacheKey);
+    if (cached) return cached;
+
     const response = await axios.get(`${RAWG_BASE_URL}/games/${id}/screenshots`, {
       params: {
         key: RAWG_API_KEY,
@@ -90,7 +120,9 @@ export async function getGameScreenshots(id: number): Promise<GameDetails['scree
       },
     });
 
-    return response.data.results || [];
+    const results = response.data.results || [];
+    setCache(cacheKey, results);
+    return results;
   } catch (error) {
     console.error('Error fetching screenshots:', error);
     return [];
@@ -98,6 +130,7 @@ export async function getGameScreenshots(id: number): Promise<GameDetails['scree
 }
 
 // Get game Reddit posts (for community tips and reviews)
+// Note: RAWG has deprecated this endpoint; returns empty gracefully.
 export async function getGameRedditPosts(id: number): Promise<any[]> {
   try {
     if (!RAWG_API_KEY) {
@@ -109,11 +142,11 @@ export async function getGameRedditPosts(id: number): Promise<any[]> {
         key: RAWG_API_KEY,
         page_size: 10,
       },
+      timeout: 5000,
     });
 
     return response.data.results || [];
-  } catch (error) {
-    console.error('Error fetching reddit posts:', error);
+  } catch {
     return [];
   }
 }
@@ -125,6 +158,10 @@ export async function getSimilarGames(id: number): Promise<RawgGame[]> {
       return [];
     }
 
+    const cacheKey = `similar:${id}`;
+    const cached = getCached<RawgGame[]>(cacheKey);
+    if (cached) return cached;
+
     const response = await axios.get(`${RAWG_BASE_URL}/games`, {
       params: {
         key: RAWG_API_KEY,
@@ -133,7 +170,9 @@ export async function getSimilarGames(id: number): Promise<RawgGame[]> {
       },
     });
 
-    return response.data.results?.slice(0, 6) || [];
+    const results = response.data.results?.slice(0, 6) || [];
+    setCache(cacheKey, results);
+    return results;
   } catch (error) {
     console.error('Error fetching similar games:', error);
     return [];

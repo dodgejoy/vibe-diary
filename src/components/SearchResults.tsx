@@ -32,7 +32,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
       <div className="flex justify-center items-center min-h-96">
         <div className="flex flex-col items-center gap-4">
           <Loader className="animate-spin text-violet-500" size={32} />
-          <p className="text-slate-300">Searching for games...</p>
+          <p className="text-slate-300">Поиск игр...</p>
         </div>
       </div>
     );
@@ -41,7 +41,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
   if (games.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-400">No games found. Try searching for something.</p>
+        <p className="text-slate-400">Игры не найдены. Попробуйте другой запрос.</p>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
                 </h3>
                 {game.released && (
                   <p className="text-sm text-slate-400">
-                    Released: {new Date(game.released).getFullYear()}
+                    Вышла: {new Date(game.released).getFullYear()}
                   </p>
                 )}
                 {game.genres && game.genres.length > 0 && (
@@ -115,7 +115,7 @@ export function SearchResults({ games, isLoading = false, onAddGame }: SearchRes
                   <Plus size={16} />
                 )}
                 <span className="hidden sm:inline text-sm">
-                  {isAdded ? 'Added' : 'Add'}
+                  {isAdded ? 'Добавлено' : 'Добавить'}
                 </span>
               </button>
             </div>

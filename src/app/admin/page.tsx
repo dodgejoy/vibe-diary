@@ -1,16 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Shield, Star, UserCircle2, Users, Gamepad2, Trophy, Loader, Crown, RefreshCcw, Search, Trash2, Medal } from 'lucide-react';
+import { Shield, Star, UserCircle2, Users, Gamepad2, Loader, Crown, RefreshCcw, Search, Trash2 } from 'lucide-react';
 import { useAuth } from '@/components';
 import {
   deleteAnyGameAsAdmin,
-  fetchAdminAchievementStats,
   fetchAdminGames,
   fetchAdminProfiles,
-  fetchAdminUserAchievements,
-  type AchievementStats,
-  type AdminUserAchievement,
   type Game,
   type UserProfile,
   updateUserRole,
@@ -20,17 +16,12 @@ type UserSummary = UserProfile & {
   gameCount: number;
   completedCount: number;
   ratedCount: number;
-  achievementCount: number;
-  totalXp: number;
-  lastAchievedAt?: string;
 };
 
 export default function AdminPage() {
   const { profile, user } = useAuth();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [achievementStats, setAchievementStats] = useState<AchievementStats[]>([]);
-  const [userAchievements, setUserAchievements] = useState<AdminUserAchievement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,20 +40,16 @@ export default function AdminPage() {
 
     setError(null);
     try {
-      const [profileRows, gameRows, achievementStatRows, userAchievementRows] = await Promise.all([
+      const [profileRows, gameRows] = await Promise.all([
         fetchAdminProfiles(),
         fetchAdminGames(),
-        fetchAdminAchievementStats(),
-        fetchAdminUserAchievements(),
       ]);
 
       setProfiles(profileRows);
       setGames(gameRows);
-      setAchievementStats(achievementStatRows);
-      setUserAchievements(userAchievementRows);
     } catch (loadError) {
       console.error(loadError);
-      setError('Failed to load admin dashboard data.');
+      setError('Не удалось загрузить данные админ-панели.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -76,20 +63,15 @@ export default function AdminPage() {
   const userSummaries = useMemo<UserSummary[]>(() => {
     return profiles.map((profileItem) => {
       const userGames = games.filter((game) => game.user_id === profileItem.user_id);
-      const stats = achievementStats.find((statsItem) => statsItem.user_id === profileItem.user_id);
-      const unlocked = userAchievements.filter((achievement) => achievement.user_id === profileItem.user_id).length;
 
       return {
         ...profileItem,
         gameCount: userGames.length,
         completedCount: userGames.filter((game) => game.status === 'Completed').length,
         ratedCount: userGames.filter((game) => Boolean(game.detailed_ratings)).length,
-        achievementCount: unlocked,
-        totalXp: stats?.total_reward_points || 0,
-        lastAchievedAt: stats?.last_achieved_at,
       };
     });
-  }, [achievementStats, games, profiles, userAchievements]);
+  }, [games, profiles]);
 
   const filteredUsers = useMemo(() => {
     return userSummaries.filter((profileItem) => {
@@ -103,8 +85,6 @@ export default function AdminPage() {
   const totalAdmins = userSummaries.filter((profileItem) => profileItem.role === 'admin').length;
   const totalGames = games.length;
   const totalCompletedGames = games.filter((game) => game.status === 'Completed').length;
-  const totalUnlockedAchievements = userAchievements.length;
-  const totalXp = achievementStats.reduce((sum, statsItem) => sum + (statsItem.total_reward_points || 0), 0);
 
   const filteredGames = useMemo(() => {
     return games
@@ -119,12 +99,6 @@ export default function AdminPage() {
       ownerEmail: profiles.find((profileItem) => profileItem.user_id === game.user_id)?.email || 'Unknown user',
     }));
   }, [gameSearch, games, profiles]);
-
-  const topAchievementUsers = useMemo(() => {
-    return [...userSummaries]
-      .sort((left, right) => right.totalXp - left.totalXp || right.achievementCount - left.achievementCount)
-      .slice(0, 5);
-  }, [userSummaries]);
 
   const handleRoleChange = async (targetUserId: string, nextRole: UserProfile['role']) => {
     setUpdatingRoleId(targetUserId);
@@ -148,7 +122,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteGame = async (gameId: string) => {
-    const confirmed = confirm('Delete this game from the database for its owner?');
+    const confirmed = confirm('Удалить эту игру из базы данных для её владельца?');
     if (!confirmed) {
       return;
     }
@@ -172,7 +146,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-16">
         <div className="flex flex-col items-center gap-4 text-center">
           <Loader className="animate-spin text-amber-400" size={34} />
-          <p className="text-slate-300 font-semibold">Loading admin dashboard...</p>
+          <p className="text-slate-300 font-semibold">Загрузка панели администратора...</p>
         </div>
       </div>
     );
@@ -188,9 +162,9 @@ export default function AdminPage() {
               <Shield size={18} />
               Admin Control Center
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white mb-3">Control users, roles, and collection health</h1>
+            <h1 className="text-4xl font-black tracking-tight text-white mb-3">Управление пользователями, ролями и коллекциями</h1>
             <p className="text-slate-400 max-w-2xl leading-relaxed">
-              This area is visible only to accounts whose profile role is set to <span className="text-slate-200 font-semibold">admin</span>. From here you can review all user profiles and promote trusted accounts.
+              Эта область доступна только аккаунтам с ролью <span className="text-slate-200 font-semibold">admin</span>. Здесь можно просматривать профили и назначать роли.
             </p>
             <div className="mt-6">
               <button
@@ -199,7 +173,7 @@ export default function AdminPage() {
                 className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-slate-200 hover:text-white hover:bg-slate-800 transition-all disabled:opacity-60"
               >
                 <RefreshCcw size={16} className={isRefreshing ? 'animate-spin' : ''} />
-                {isRefreshing ? 'Refreshing...' : 'Refresh data'}
+                {isRefreshing ? 'Обновление...' : 'Обновить данные'}
               </button>
             </div>
           </div>
@@ -211,54 +185,40 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Users size={16} className="text-violet-400" />
-              Users
+              Пользователи
             </div>
             <div className="text-3xl font-extrabold text-white">{totalUsers}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Crown size={16} className="text-amber-400" />
-              Admins
+              Админы
             </div>
             <div className="text-3xl font-extrabold text-amber-300">{totalAdmins}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
               <Gamepad2 size={16} className="text-sky-400" />
-              Games tracked
+              Игр отслежено
             </div>
             <div className="text-3xl font-extrabold text-white">{totalGames}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
-              <Trophy size={16} className="text-emerald-400" />
-              Completed
+              <Gamepad2 size={16} className="text-emerald-400" />
+              Пройдено
             </div>
             <div className="text-3xl font-extrabold text-emerald-300">{totalCompletedGames}</div>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
-              <Medal size={16} className="text-fuchsia-400" />
-              Unlocked
-            </div>
-            <div className="text-3xl font-extrabold text-fuchsia-300">{totalUnlockedAchievements}</div>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
-              <Star size={16} className="text-yellow-400" />
-              XP total
-            </div>
-            <div className="text-3xl font-extrabold text-yellow-300">{totalXp}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="text-slate-400 text-sm mb-2">Role</div>
+            <div className="text-slate-400 text-sm mb-2">Роль</div>
             <div className="text-2xl font-extrabold text-amber-300 uppercase">{profile?.role ?? 'unknown'}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
@@ -266,10 +226,10 @@ export default function AdminPage() {
             <div className="text-lg font-bold text-white break-all">{profile?.email || user?.email || 'unknown'}</div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="text-slate-400 text-sm mb-2">Status</div>
+            <div className="text-slate-400 text-sm mb-2">Статус</div>
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-emerald-300 font-semibold">
               <Star size={14} />
-              Verified in app
+              Подтверждён в приложении
             </div>
           </div>
         </div>
@@ -277,7 +237,7 @@ export default function AdminPage() {
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 overflow-hidden">
           <div className="flex items-center gap-3 mb-5 text-white font-bold text-xl">
             <UserCircle2 size={20} className="text-violet-400" />
-            Users and roles
+            Пользователи и роли
           </div>
 
           <div className="flex flex-col md:flex-row gap-3 mb-5">
@@ -286,7 +246,7 @@ export default function AdminPage() {
               <input
                 value={userSearch}
                 onChange={(event) => setUserSearch(event.target.value)}
-                placeholder="Search by email..."
+                placeholder="Поиск по email..."
                 className="w-full rounded-2xl border border-white/10 bg-slate-950/60 pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
               />
             </div>
@@ -295,9 +255,9 @@ export default function AdminPage() {
               onChange={(event) => setRoleFilter(event.target.value as 'all' | 'admin' | 'user')}
               className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-white focus:outline-none focus:border-violet-500"
             >
-              <option value="all">All roles</option>
-              <option value="admin">Admins only</option>
-              <option value="user">Users only</option>
+              <option value="all">Все роли</option>
+              <option value="admin">Только админы</option>
+              <option value="user">Только пользователи</option>
             </select>
           </div>
 
@@ -307,12 +267,10 @@ export default function AdminPage() {
                 <tr className="text-left text-slate-400 border-b border-white/10">
                   <th className="pb-3 font-semibold">Email</th>
                   <th className="pb-3 font-semibold">Role</th>
-                  <th className="pb-3 font-semibold">Games</th>
-                  <th className="pb-3 font-semibold">Completed</th>
-                  <th className="pb-3 font-semibold">Rated</th>
-                  <th className="pb-3 font-semibold">Achievements</th>
-                  <th className="pb-3 font-semibold">XP</th>
-                  <th className="pb-3 font-semibold">Action</th>
+                  <th className="pb-3 font-semibold">Игры</th>
+                  <th className="pb-3 font-semibold">Пройдено</th>
+                  <th className="pb-3 font-semibold">Оценено</th>
+                  <th className="pb-3 font-semibold">Действие</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,7 +283,7 @@ export default function AdminPage() {
                       <td className="py-4 pr-4">
                         <div className="font-medium text-white break-all">{profileItem.email}</div>
                         {isCurrentAdmin && (
-                          <div className="text-xs text-slate-500 mt-1">Current session</div>
+                          <div className="text-xs text-slate-500 mt-1">Текущая сессия</div>
                         )}
                       </td>
                       <td className="py-4 pr-4">
@@ -340,8 +298,6 @@ export default function AdminPage() {
                       <td className="py-4 pr-4 text-slate-300">{profileItem.gameCount}</td>
                       <td className="py-4 pr-4 text-slate-300">{profileItem.completedCount}</td>
                       <td className="py-4 pr-4 text-slate-300">{profileItem.ratedCount}</td>
-                      <td className="py-4 pr-4 text-fuchsia-300 font-semibold">{profileItem.achievementCount}</td>
-                      <td className="py-4 pr-4 text-yellow-300 font-semibold">{profileItem.totalXp}</td>
                       <td className="py-4">
                         <button
                           onClick={() => handleRoleChange(profileItem.user_id, nextRole)}
@@ -353,10 +309,10 @@ export default function AdminPage() {
                           }`}
                         >
                           {updatingRoleId === profileItem.user_id
-                            ? 'Updating...'
+                            ? 'Обновление...'
                             : profileItem.role === 'admin'
-                            ? (isCurrentAdmin ? 'Current admin' : 'Make user')
-                            : 'Make admin'}
+                            ? (isCurrentAdmin ? 'Текущий админ' : 'Сделать пользователем')
+                            : 'Сделать админом'}
                         </button>
                       </td>
                     </tr>
@@ -369,29 +325,8 @@ export default function AdminPage() {
 
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
           <div className="flex items-center gap-3 mb-5 text-white font-bold text-xl">
-            <Trophy size={20} className="text-fuchsia-400" />
-            Achievement leaders
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {topAchievementUsers.length === 0 ? (
-              <div className="text-slate-500">No achievement data yet.</div>
-            ) : (
-              topAchievementUsers.map((profileItem) => (
-                <div key={profileItem.user_id} className="rounded-2xl border border-white/5 bg-slate-950/50 p-4">
-                  <div className="text-white font-semibold break-all mb-2">{profileItem.email}</div>
-                  <div className="text-sm text-fuchsia-300">{profileItem.achievementCount} unlocked</div>
-                  <div className="text-sm text-yellow-300 mt-1">{profileItem.totalXp} XP</div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-          <div className="flex items-center gap-3 mb-5 text-white font-bold text-xl">
             <Gamepad2 size={20} className="text-sky-400" />
-            Game moderation
+            Модерация игр
           </div>
 
           <div className="relative mb-5">
@@ -399,20 +334,20 @@ export default function AdminPage() {
             <input
               value={gameSearch}
               onChange={(event) => setGameSearch(event.target.value)}
-              placeholder="Search by game title or owner email..."
+              placeholder="Поиск по названию игры или email владельца..."
               className="w-full rounded-2xl border border-white/10 bg-slate-950/60 pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
             />
           </div>
 
           <div className="space-y-3">
             {filteredGames.length === 0 ? (
-              <div className="text-slate-500">No games tracked yet.</div>
+              <div className="text-slate-500">Игр пока нет.</div>
             ) : (
               filteredGames.map((game) => (
                 <div key={game.id} className="rounded-2xl border border-white/5 bg-slate-950/50 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <div className="font-semibold text-white">{game.title}</div>
-                    <div className="text-sm text-slate-500">Owner: {game.ownerEmail}</div>
+                    <div className="text-sm text-slate-500">Владелец: {game.ownerEmail}</div>
                   </div>
                   <div className="flex items-center gap-3 text-sm flex-wrap">
                     <span className="rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-slate-300">
@@ -420,7 +355,7 @@ export default function AdminPage() {
                     </span>
                     {game.detailed_ratings && (
                       <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-violet-300">
-                        Rated
+                        Оценено
                       </span>
                     )}
                     <button
@@ -429,7 +364,7 @@ export default function AdminPage() {
                       className="inline-flex items-center gap-2 rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 py-1.5 text-rose-200 hover:bg-rose-500/20 transition-all disabled:opacity-50"
                     >
                       <Trash2 size={14} />
-                      {deletingGameId === game.id ? 'Deleting...' : 'Delete'}
+                      {deletingGameId === game.id ? 'Удаление...' : 'Удалить'}
                     </button>
                   </div>
                 </div>

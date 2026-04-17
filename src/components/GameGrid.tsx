@@ -1,6 +1,6 @@
 'use client';
 
-import { Game } from '@/lib/supabase';
+import { Game, getNormalizedScore } from '@/lib/supabase';
 import { GameCard3D } from './GameCard3D';
 import { useEffect, useMemo, useState } from 'react';
 import { Filter, Heart, RotateCcw, Search, SlidersHorizontal, Sparkles, Star } from 'lucide-react';
@@ -19,8 +19,7 @@ function getNormalizedRating(game: Game): number {
     return 0;
   }
 
-  const total = Object.values(game.detailed_ratings).reduce((sum, value) => sum + value, 0);
-  return total / 90;
+  return getNormalizedScore(game.detailed_ratings) / 10;
 }
 
 export function GameGrid({ games }: GameGridProps) {
@@ -72,11 +71,12 @@ export function GameGrid({ games }: GameGridProps) {
     setSearchQuery('');
   };
 
-  const ratedCount = games.filter((game) => Boolean(game.detailed_ratings)).length;
-  const favoriteCount = games.filter((game) => favoriteGameIds.has(game.id)).length;
-  const averagePersonalScore = ratedCount
-    ? (games.filter((game) => game.detailed_ratings).reduce((sum, game) => sum + getNormalizedRating(game), 0) / ratedCount) * 10
-    : null;
+  const ratedCount = useMemo(() => games.filter((game) => Boolean(game.detailed_ratings)).length, [games]);
+  const favoriteCount = useMemo(() => games.filter((game) => favoriteGameIds.has(game.id)).length, [games, favoriteGameIds]);
+  const averagePersonalScore = useMemo(() => {
+    if (!ratedCount) return null;
+    return (games.filter((game) => game.detailed_ratings).reduce((sum, game) => sum + getNormalizedRating(game), 0) / ratedCount) * 10;
+  }, [games, ratedCount]);
 
   // Filter games
   const filteredGames = useMemo(() => {
@@ -137,16 +137,16 @@ export function GameGrid({ games }: GameGridProps) {
     return (
       <div className="flex flex-col items-center justify-center min-h-96 text-center">
         <h3 className="text-xl font-semibold text-slate-200 mb-2">
-          No games yet
+          Игр пока нет
         </h3>
         <p className="text-slate-400 mb-6">
-          Start by adding your first game to your diary
+          Добавь свою первую игру в дневник
         </p>
         <a
           href="/add-game"
           className="px-6 py-2 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white font-medium rounded-lg transition-colors"
         >
-          Add Your First Game
+          Добавить первую игру
         </a>
       </div>
     );
@@ -158,42 +158,42 @@ export function GameGrid({ games }: GameGridProps) {
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
           <div className="flex items-center gap-2 text-slate-400 text-xs uppercase tracking-[0.2em] mb-2">
             <Sparkles size={14} className="text-violet-400" />
-            Visible now
+            Отображается
           </div>
           <div className="text-3xl font-extrabold text-white">{sortedGames.length}</div>
-          <div className="text-sm text-slate-500 mt-1">From {games.length} tracked games</div>
+          <div className="text-sm text-slate-500 mt-1">Из {games.length} отслеженных игр</div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
           <div className="flex items-center gap-2 text-slate-400 text-xs uppercase tracking-[0.2em] mb-2">
             <Star size={14} className="text-yellow-400" />
-            Personal ratings
+            Личные оценки
           </div>
           <div className="text-3xl font-extrabold text-white">{ratedCount}</div>
           <div className="text-sm text-slate-500 mt-1">
-            {averagePersonalScore !== null ? `Average ${averagePersonalScore.toFixed(1)} / 10` : 'No ratings yet'}
+            {averagePersonalScore !== null ? `Средняя ${averagePersonalScore.toFixed(1)} / 10` : 'Оценок пока нет'}
           </div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
           <div className="flex items-center gap-2 text-slate-400 text-xs uppercase tracking-[0.2em] mb-2">
             <Heart size={14} className="text-rose-400" />
-            Favorites
+            Избранное
           </div>
           <div className="text-3xl font-extrabold text-white">{favoriteCount}</div>
-          <div className="text-sm text-slate-500 mt-1">Pinned for quick comeback</div>
+          <div className="text-sm text-slate-500 mt-1">Закреплено для быстрого доступа</div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
           <div className="flex items-center gap-2 text-slate-400 text-xs uppercase tracking-[0.2em] mb-2">
             <SlidersHorizontal size={14} className="text-sky-400" />
-            Library view
+            Вид библиотеки
           </div>
           <div className="text-lg font-bold text-white line-clamp-2">
-            {collectionFilter === 'all' ? 'Full collection' : `${collectionFilter[0].toUpperCase()}${collectionFilter.slice(1)} only`}
+            {collectionFilter === 'all' ? 'Вся коллекция' : `${collectionFilter[0].toUpperCase()}${collectionFilter.slice(1)} only`}
           </div>
           <div className="text-sm text-slate-500 mt-1">
-            {statusFilter === 'all' ? 'All statuses' : statusFilter}
+            {statusFilter === 'all' ? 'Все статусы' : statusFilter}
           </div>
         </div>
       </div>
@@ -206,7 +206,7 @@ export function GameGrid({ games }: GameGridProps) {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search your library by title, genre, or status..."
+              placeholder="Поиск по библиотеке по названию, жанру или статусу..."
               className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 pl-12 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500 transition-colors"
             />
           </div>
@@ -217,7 +217,7 @@ export function GameGrid({ games }: GameGridProps) {
               className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-colors text-slate-300 hover:text-white"
             >
               <Filter size={18} />
-              Filters
+              Фильтры
             </button>
 
             <select
@@ -225,11 +225,11 @@ export function GameGrid({ games }: GameGridProps) {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 hover:text-white hover:border-slate-600 transition-colors appearance-none cursor-pointer"
             >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="rating">Highest rated</option>
-              <option value="title">Title (A-Z)</option>
-              <option value="status">Status</option>
+              <option value="newest">Сначала новые</option>
+              <option value="oldest">Сначала старые</option>
+              <option value="rating">По оценке</option>
+              <option value="title">По названию (А-Я)</option>
+              <option value="status">По статусу</option>
             </select>
 
             {(searchQuery || statusFilter !== 'all' || collectionFilter !== 'all' || sortBy !== 'newest') && (
@@ -238,7 +238,7 @@ export function GameGrid({ games }: GameGridProps) {
                 className="flex items-center gap-2 px-4 py-2.5 bg-slate-950/70 hover:bg-slate-900 border border-slate-700 rounded-xl transition-colors text-slate-300 hover:text-white"
               >
                 <RotateCcw size={16} />
-                Reset
+                Сбросить
               </button>
             )}
           </div>
@@ -246,10 +246,10 @@ export function GameGrid({ games }: GameGridProps) {
 
         <div className="flex flex-wrap gap-2">
           {[
-            { key: 'all', label: 'All', count: games.length },
-            { key: 'favorites', label: 'Favorites', count: favoriteCount },
-            { key: 'rated', label: 'Rated', count: ratedCount },
-            { key: 'unrated', label: 'Unrated', count: games.length - ratedCount },
+            { key: 'all', label: 'Все', count: games.length },
+            { key: 'favorites', label: 'Избранное', count: favoriteCount },
+            { key: 'rated', label: 'С оценкой', count: ratedCount },
+            { key: 'unrated', label: 'Без оценки', count: games.length - ratedCount },
           ].map((filter) => (
             <button
               key={filter.key}
@@ -269,7 +269,7 @@ export function GameGrid({ games }: GameGridProps) {
       {/* Filters Panel */}
       {showFilters && (
         <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-2xl space-y-3 animate-in fade-in">
-          <h3 className="font-semibold text-white mb-3">Status</h3>
+          <h3 className="font-semibold text-white mb-3">Статус</h3>
           <div className="flex flex-wrap gap-2">
             {['all', 'Not Started', 'Playing', 'Completed', 'Abandoned'].map((status) => (
               <button
@@ -281,7 +281,7 @@ export function GameGrid({ games }: GameGridProps) {
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
-                {status === 'all' ? 'All statuses' : status}
+                {status === 'all' ? 'Все статусы' : status}
               </button>
             ))}
           </div>
@@ -290,10 +290,10 @@ export function GameGrid({ games }: GameGridProps) {
 
       {/* Results Count */}
       <div className="text-sm text-slate-400 flex flex-wrap gap-x-4 gap-y-2">
-        <span>Showing {sortedGames.length} of {games.length} games</span>
-        {searchQuery && <span>Search: "{searchQuery}"</span>}
-        {collectionFilter !== 'all' && <span>Collection: {collectionFilter}</span>}
-        {statusFilter !== 'all' && <span>Status: {statusFilter}</span>}
+        <span>Показано {sortedGames.length} из {games.length} игр</span>
+        {searchQuery && <span>Поиск: "{searchQuery}"</span>}
+        {collectionFilter !== 'all' && <span>Коллекция: {collectionFilter}</span>}
+        {statusFilter !== 'all' && <span>Статус: {statusFilter}</span>}
       </div>
 
       {/* Game Grid */}
@@ -312,10 +312,10 @@ export function GameGrid({ games }: GameGridProps) {
       ) : (
         <div className="flex flex-col items-center justify-center min-h-96 text-center">
           <h3 className="text-xl font-semibold text-slate-200 mb-2">
-            Nothing matches this library view
+            Ничего не найдено
           </h3>
           <p className="text-slate-400">
-            Try changing the search, collection filter, or status filter.
+            Попробуйте изменить поиск, фильтр коллекции или статус.
           </p>
         </div>
       )}

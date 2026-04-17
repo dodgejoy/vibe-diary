@@ -1,37 +1,107 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { DetailedRatings } from '@/lib/supabase';
-import { X, Check, Star } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { DetailedRatings, getMaxScore, getNormalizedScore } from '@/lib/supabase';
+import { X, Check, RotateCcw, Zap, BookOpen } from 'lucide-react';
 
 interface DetailedRatingSelectorProps {
   value?: DetailedRatings | null;
   onChange: (ratings: DetailedRatings) => void;
   gameTitle?: string;
+  genres?: string;
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-const CRITERIA = [
-  { key: 'gameplay' as const, name: 'Геймплей', max: 20, color: 'from-blue-500 to-indigo-500', hex: '#6366f1' },
-  { key: 'visuals' as const, name: 'Визуал', max: 15, color: 'from-cyan-400 to-blue-500', hex: '#0ea5e9' },
-  { key: 'atmosphere' as const, name: 'Атмосфера', max: 15, color: 'from-fuchsia-500 to-purple-600', hex: '#a855f7' },
-  { key: 'sound' as const, name: 'Звук', max: 10, color: 'from-violet-400 to-fuchsia-500', hex: '#d946ef' },
-  { key: 'technical' as const, name: 'Техника', max: 10, color: 'from-emerald-400 to-teal-500', hex: '#14b8a6' },
-  { key: 'content' as const, name: 'Контент', max: 10, color: 'from-orange-400 to-amber-500', hex: '#f59e0b' },
-  { key: 'impression' as const, name: 'Впечатление', max: 10, color: 'from-rose-400 to-pink-500', hex: '#f43f5e' },
+type CriterionDef = {
+  key: keyof DetailedRatings;
+  name: string;
+  max: number;
+  color: string;
+  hex: string;
+  icon: string;
+  desc: string;
+};
+
+const BASE_CRITERIA: CriterionDef[] = [
+  { key: 'gameplay', name: 'Геймплей', max: 20, color: 'from-blue-500 to-indigo-500', hex: '#6366f1', icon: '🎮', desc: 'Механики, управление, баланс' },
+  { key: 'visuals', name: 'Визуал', max: 15, color: 'from-cyan-400 to-blue-500', hex: '#0ea5e9', icon: '🎨', desc: 'Графика, стиль, анимации' },
+  { key: 'atmosphere', name: 'Атмосфера', max: 15, color: 'from-fuchsia-500 to-purple-600', hex: '#a855f7', icon: '🌌', desc: 'Мир, погружение, сеттинг' },
+  { key: 'sound', name: 'Звук', max: 10, color: 'from-violet-400 to-fuchsia-500', hex: '#d946ef', icon: '🎵', desc: 'Музыка, эффекты, озвучка' },
+  { key: 'technical', name: 'Техника', max: 10, color: 'from-emerald-400 to-teal-500', hex: '#14b8a6', icon: '⚙️', desc: 'Стабильность, оптимизация' },
+  { key: 'content', name: 'Контент', max: 10, color: 'from-orange-400 to-amber-500', hex: '#f59e0b', icon: '📦', desc: 'Объём, реиграбельность' },
+  { key: 'impression', name: 'Впечатление', max: 10, color: 'from-rose-400 to-pink-500', hex: '#f43f5e', icon: '💎', desc: 'Личные эмоции, послевкусие' },
 ];
+
+const STORY_CRITERION: CriterionDef = {
+  key: 'story', name: 'Сюжет', max: 15, color: 'from-amber-400 to-yellow-500', hex: '#eab308', icon: '📖', desc: 'Нарратив, персонажи, развязка',
+};
+
+const STORY_GENRES = [
+  'rpg', 'adventure', 'action rpg', 'role-playing', 'visual novel',
+  'interactive fiction', 'narrative', 'story', 'jrpg', 'crpg',
+  'point-and-click', 'walking simulator', 'horror', 'survival horror',
+];
+
+function isStoryGame(genres?: string): boolean {
+  if (!genres) return false;
+  const lower = genres.toLowerCase();
+  return STORY_GENRES.some((g) => lower.includes(g));
+}
+
+const BASE_PRESETS: { name: string; emoji: string; ratings: DetailedRatings }[] = [
+  { name: 'Шедевр', emoji: '👑', ratings: { gameplay: 18, visuals: 14, atmosphere: 14, sound: 9, technical: 9, content: 9, impression: 10 } },
+  { name: 'Отлично', emoji: '🔥', ratings: { gameplay: 16, visuals: 12, atmosphere: 12, sound: 8, technical: 8, content: 8, impression: 8 } },
+  { name: 'Хорошо', emoji: '👍', ratings: { gameplay: 13, visuals: 10, atmosphere: 10, sound: 7, technical: 7, content: 7, impression: 7 } },
+  { name: 'Средне', emoji: '😐', ratings: { gameplay: 10, visuals: 8, atmosphere: 7, sound: 5, technical: 5, content: 5, impression: 5 } },
+  { name: 'Слабо', emoji: '👎', ratings: { gameplay: 6, visuals: 4, atmosphere: 4, sound: 3, technical: 3, content: 3, impression: 3 } },
+];
+
+function presetsWithStory(include: boolean): typeof BASE_PRESETS {
+  if (!include) return BASE_PRESETS;
+  return BASE_PRESETS.map((p) => ({
+    ...p,
+    ratings: { ...p.ratings, story: Math.round((Object.values(p.ratings).reduce((a, b) => a + b, 0) / 90) * 15) },
+  }));
+}
+
+function getCriterionLevel(value: number, max: number): { label: string; color: string } {
+  const pct = value / max;
+  if (pct >= 0.9) return { label: 'Великолепно', color: 'text-yellow-400' };
+  if (pct >= 0.75) return { label: 'Отлично', color: 'text-emerald-400' };
+  if (pct >= 0.6) return { label: 'Хорошо', color: 'text-blue-400' };
+  if (pct >= 0.4) return { label: 'Нормально', color: 'text-orange-400' };
+  if (pct > 0) return { label: 'Слабо', color: 'text-rose-400' };
+  return { label: 'Не оценено', color: 'text-slate-600' };
+}
+
+function getMoodEmoji(score: number): string {
+  if (score >= 85) return '🤩';
+  if (score >= 75) return '😍';
+  if (score >= 65) return '😊';
+  if (score >= 55) return '🙂';
+  if (score >= 40) return '😐';
+  if (score >= 20) return '😕';
+  return '💤';
+}
 
 export function DetailedRatingSelector({
   value,
   onChange,
   gameTitle = 'Игра',
+  genres,
   isOpen = true,
   onOpenChange,
 }: DetailedRatingSelectorProps) {
-  const [ratings, setRatings] = useState<DetailedRatings>(
-    value || { gameplay: 0, visuals: 0, atmosphere: 0, sound: 0, technical: 0, content: 0, impression: 0 }
-  );
+  const showStory = isStoryGame(genres) || (value != null && 'story' in value && value.story !== undefined);
+  const CRITERIA = useMemo(() => showStory ? [...BASE_CRITERIA, STORY_CRITERION] : BASE_CRITERIA, [showStory]);
+  const PRESETS = useMemo(() => presetsWithStory(showStory), [showStory]);
+
+  const defaultRatings: DetailedRatings = showStory
+    ? { gameplay: 0, visuals: 0, atmosphere: 0, sound: 0, technical: 0, content: 0, impression: 0, story: 0 }
+    : { gameplay: 0, visuals: 0, atmosphere: 0, sound: 0, technical: 0, content: 0, impression: 0 };
+
+  const [ratings, setRatings] = useState<DetailedRatings>(value || defaultRatings);
 
   const [open, setOpen] = useState(isOpen);
 
@@ -39,16 +109,17 @@ export function DetailedRatingSelector({
     setOpen(isOpen);
   }, [isOpen]);
 
-  const totalScore = Object.values(ratings).reduce((a, b) => a + b, 0);
-  const maxScore = 90;
-  const normalizedScore = ((totalScore / maxScore) * 10).toFixed(1);
+  const totalScore = Object.values(ratings).reduce((a, b) => a + (b ?? 0), 0);
+  const maxScore = getMaxScore(ratings);
+  const normalizedScore = getNormalizedScore(ratings).toFixed(1);
+  const scorePercent = totalScore / maxScore;
 
   const getScoreData = (score: number) => {
-    if (score >= 80) return { color: 'text-yellow-400', shadow: 'shadow-yellow-500/20', bg: 'bg-yellow-500/10' };
-    if (score >= 70) return { color: 'text-emerald-400', shadow: 'shadow-emerald-500/20', bg: 'bg-emerald-500/10' };
-    if (score >= 60) return { color: 'text-blue-400', shadow: 'shadow-blue-500/20', bg: 'bg-blue-500/10' };
-    if (score >= 50) return { color: 'text-orange-400', shadow: 'shadow-orange-500/20', bg: 'bg-orange-500/10' };
-    return { color: 'text-rose-400', shadow: 'shadow-rose-500/20', bg: 'bg-rose-500/10' };
+    if (score >= 80) return { color: 'text-yellow-400', hex: '#facc15', shadow: 'shadow-yellow-500/20', bg: 'bg-yellow-500/10' };
+    if (score >= 70) return { color: 'text-emerald-400', hex: '#34d399', shadow: 'shadow-emerald-500/20', bg: 'bg-emerald-500/10' };
+    if (score >= 60) return { color: 'text-blue-400', hex: '#60a5fa', shadow: 'shadow-blue-500/20', bg: 'bg-blue-500/10' };
+    if (score >= 50) return { color: 'text-orange-400', hex: '#fb923c', shadow: 'shadow-orange-500/20', bg: 'bg-orange-500/10' };
+    return { color: 'text-rose-400', hex: '#fb7185', shadow: 'shadow-rose-500/20', bg: 'bg-rose-500/10' };
   };
 
   const scoreData = getScoreData(totalScore);
@@ -71,6 +142,16 @@ export function DetailedRatingSelector({
     onChange(updatedRatings);
   };
 
+  const applyPreset = (preset: DetailedRatings) => {
+    setRatings(preset);
+    onChange(preset);
+  };
+
+  const resetRatings = () => {
+    setRatings(defaultRatings);
+    onChange(defaultRatings);
+  };
+
   const handleClose = () => {
     setOpen(false);
     onOpenChange?.(false);
@@ -81,7 +162,7 @@ export function DetailedRatingSelector({
   // Radar Chart Calculations
   const size = 300;
   const center = size / 2;
-  const radius = (size / 2) - 30;
+  const radius = (size / 2) - 50;
   const angleStep = (Math.PI * 2) / CRITERIA.length;
 
   const getPoint = (percentage: number, i: number) => {
@@ -92,12 +173,28 @@ export function DetailedRatingSelector({
     };
   };
 
+  const getLabelPoint = (i: number) => {
+    const angle = i * angleStep - Math.PI / 2;
+    const labelRadius = radius + 32;
+    return {
+      x: center + labelRadius * Math.cos(angle),
+      y: center + labelRadius * Math.sin(angle),
+    };
+  };
+
   const points = CRITERIA.map((crit, i) => {
-    const percentage = ratings[crit.key] / crit.max;
+    const percentage = (ratings[crit.key] ?? 0) / crit.max;
     return getPoint(percentage, i);
   });
   
   const pointsString = points.map(p => `${p.x},${p.y}`).join(' ');
+
+  // Score ring
+  const ringSize = 160;
+  const ringCenter = ringSize / 2;
+  const ringRadius = 66;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - scorePercent);
 
   return (
     <>
@@ -108,26 +205,58 @@ export function DetailedRatingSelector({
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
         <div
-          className="w-full max-w-5xl bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-[0_0_120px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row relative"
+          className="w-full max-w-6xl max-h-[95vh] bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-[0_0_120px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col md:flex-row relative"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Subtle global gradient glow in background */}
           <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-600/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-fuchsia-600/5 blur-[80px] rounded-full pointer-events-none" />
 
-          {/* Left panel: Radial Chart and Total */}
-          <div className="w-full md:w-[45%] p-8 border-b md:border-b-0 md:border-r border-white/5 flex flex-col items-center justify-center relative">
-            <div className="absolute top-8 left-8">
+          {/* Left panel: Radial Chart, Score Ring, Mood */}
+          <div className="w-full md:w-[42%] p-6 md:p-8 border-b md:border-b-0 md:border-r border-white/5 flex flex-col items-center justify-between relative overflow-y-auto">
+            <div className="w-full">
               <h3 className="text-slate-500 text-xs font-black uppercase tracking-[0.2em]">{gameTitle}</h3>
             </div>
+
+            {/* Score Ring */}
+            <div className="relative my-4 flex items-center justify-center">
+              <svg width={ringSize} height={ringSize} className="rotate-[-90deg]">
+                <circle cx={ringCenter} cy={ringCenter} r={ringRadius} fill="none" stroke="rgba(51,65,85,0.3)" strokeWidth="10" />
+                <circle
+                  cx={ringCenter} cy={ringCenter} r={ringRadius} fill="none"
+                  stroke={scoreData.hex}
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={ringOffset}
+                  className="transition-all duration-700 ease-out"
+                  style={{ filter: `drop-shadow(0 0 8px ${scoreData.hex}40)` }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl leading-none">{getMoodEmoji(totalScore)}</span>
+                <span className={`text-3xl font-black ${scoreData.color} tracking-tighter mt-1`}>
+                  {normalizedScore}
+                </span>
+                <span className="text-xs text-slate-500 font-bold">/10</span>
+              </div>
+            </div>
+
+            <div className="text-center mb-2">
+              <div className={`text-xl font-black text-white tracking-widest uppercase drop-shadow-md`}>
+                {getScoreLabel(totalScore)}
+              </div>
+              <div className="text-slate-400 text-sm font-medium mt-1">{totalScore} / {maxScore} баллов</div>
+            </div>
             
-            <div className="relative w-full aspect-square max-w-[280px] mt-8 flex-1 flex items-center justify-center">
+            {/* Radar Chart */}
+            <div className="relative w-full aspect-square max-w-[260px] flex items-center justify-center">
               <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} className="drop-shadow-2xl overflow-visible">
                 <defs>
                   <radialGradient id="radarGradient" cx="50%" cy="50%" r="50%">
                     <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
                     <stop offset="100%" stopColor="#4338ca" stopOpacity="0.05" />
                   </radialGradient>
-                  {/* Glowing filter for nodes */}
                   <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feMerge>
@@ -167,7 +296,7 @@ export function DetailedRatingSelector({
                   );
                 })}
                 
-                {/* Data Polygon Profile */}
+                {/* Data Polygon */}
                 <polygon
                   points={pointsString}
                   fill="url(#radarGradient)"
@@ -176,7 +305,7 @@ export function DetailedRatingSelector({
                   className="transition-all duration-500 ease-out"
                 />
                 
-                {/* Data Points / Nodes */}
+                {/* Data Points */}
                 {points.map((p, i) => (
                   <circle
                     key={i} cx={p.x} cy={p.y} r="5" fill={CRITERIA[i].hex}
@@ -184,34 +313,33 @@ export function DetailedRatingSelector({
                     filter="url(#glow)"
                   />
                 ))}
-              </svg>
-            </div>
 
-            <div className="mt-6 text-center space-y-1">
-              <div className="flex items-center justify-center gap-3">
-                <div className={`p-2 rounded-xl ${scoreData.bg} ${scoreData.color} shadow-lg ${scoreData.shadow}`}>
-                  <Star className="fill-current drop-shadow-md" size={32} />
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className={`text-6xl font-black ${scoreData.color} tracking-tighter drop-shadow-lg`}>
-                    {normalizedScore}
-                  </span>
-                  <span className="text-2xl text-slate-500 font-bold">/10</span>
-                </div>
-              </div>
-              <div className="text-2xl font-black text-white tracking-widest uppercase pt-2 drop-shadow-md">
-                {getScoreLabel(totalScore)}
-              </div>
-              <div className="text-slate-400 font-medium">Суммарно: <span className="text-white">{totalScore}</span> / 90</div>
+                {/* Criterion Labels on Chart */}
+                {CRITERIA.map((crit, i) => {
+                  const lp = getLabelPoint(i);
+                  return (
+                    <text
+                      key={crit.key}
+                      x={lp.x}
+                      y={lp.y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      className="fill-slate-400 text-[10px] font-bold"
+                    >
+                      {crit.icon} {crit.name}
+                    </text>
+                  );
+                })}
+              </svg>
             </div>
           </div>
 
-          {/* Right panel: Sliders */}
-          <div className="w-full md:w-[55%] p-8 bg-slate-900/30 relative flex flex-col">
-            <div className="flex justify-between items-start mb-10">
+          {/* Right panel: Presets + Sliders */}
+          <div className="w-full md:w-[58%] p-6 md:p-8 bg-slate-900/30 relative flex flex-col overflow-hidden">
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <h2 className="text-3xl font-extrabold tracking-tight text-white drop-shadow-md">Детализация</h2>
-                <p className="text-slate-400 text-sm mt-1 font-medium">Отрегулируйте метрики для точной оценки</p>
+                <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white drop-shadow-md">Детализация</h2>
+                <p className="text-slate-400 text-sm mt-1 font-medium">Настройте каждый аспект игры</p>
               </div>
               <button
                 onClick={handleClose}
@@ -222,40 +350,96 @@ export function DetailedRatingSelector({
               </button>
             </div>
 
-            <div className="space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar">
-              {CRITERIA.map((criterion) => (
-                <div key={criterion.key} className="space-y-3 group">
-                  <div className="flex justify-between items-end">
-                    <label className="font-bold text-slate-300 text-sm tracking-widest uppercase group-hover:text-white transition-colors">
-                      {criterion.name}
-                    </label>
-                    <div className="text-right flex items-baseline gap-1">
-                      <span className="text-3xl font-black text-white leading-none drop-shadow-sm">
-                        {ratings[criterion.key]}
-                      </span>
-                      <span className="text-sm text-slate-500 font-bold">/ {criterion.max}</span>
-                    </div>
-                  </div>
-
-                  <div className="relative h-4 bg-slate-950/80 rounded-full overflow-hidden shadow-inner border border-white/5 border-t-black/50">
-                    <div
-                      className={`absolute top-0 left-0 h-full bg-gradient-to-r ${criterion.color} transition-all duration-300 ease-out opacity-90 group-hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.3)]`}
-                      style={{ width: `${(ratings[criterion.key] / criterion.max) * 100}%` }}
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max={criterion.max}
-                      value={ratings[criterion.key]}
-                      onChange={(e) => handleCriterionChange(criterion.key, parseInt(e.target.value))}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                  </div>
+            {/* Quick Presets */}
+            <div className="mb-5">
+              <div className="flex items-center gap-2 mb-2.5">
+                <Zap size={14} className="text-violet-400" />
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Быстрые пресеты</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {PRESETS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    onClick={() => applyPreset(preset.ratings)}
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800/80 border border-white/5 text-slate-300 hover:text-white hover:bg-slate-700 hover:border-violet-500/30 transition-all"
+                  >
+                    {preset.emoji} {preset.name}
+                  </button>
+                ))}
+                <button
+                  onClick={resetRatings}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-800/80 border border-white/5 text-slate-500 hover:text-rose-400 hover:bg-slate-700 hover:border-rose-500/30 transition-all flex items-center gap-1"
+                >
+                  <RotateCcw size={12} />
+                  Сброс
+                </button>
+              </div>
+              {showStory && (
+                <div className="flex items-center gap-2 mt-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg w-fit">
+                  <BookOpen size={14} className="text-amber-400" />
+                  <span className="text-xs font-bold text-amber-300">Сюжетная игра — критерий «Сюжет» активен</span>
                 </div>
-              ))}
+              )}
             </div>
 
-            <div className="mt-8 pt-8 border-t border-white/5">
+            {/* Sliders */}
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+              {CRITERIA.map((criterion) => {
+                const val = ratings[criterion.key] ?? 0;
+                const pct = (val / criterion.max) * 100;
+                const level = getCriterionLevel(val, criterion.max);
+
+                return (
+                  <div key={criterion.key} className="group">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{criterion.icon}</span>
+                        <div>
+                          <label className="font-bold text-slate-300 text-sm tracking-wide group-hover:text-white transition-colors">
+                            {criterion.name}
+                          </label>
+                          <p className="text-[11px] text-slate-600 font-medium leading-tight">{criterion.desc}</p>
+                        </div>
+                      </div>
+                      <div className="text-right flex items-center gap-2">
+                        <span className={`text-[11px] font-bold ${level.color} hidden sm:inline`}>{level.label}</span>
+                        <div className="flex items-baseline gap-0.5">
+                          <span className="text-2xl font-black text-white leading-none">
+                            {val}
+                          </span>
+                          <span className="text-xs text-slate-500 font-bold">/{criterion.max}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="relative h-3.5 bg-slate-950/80 rounded-full overflow-hidden shadow-inner border border-white/5 border-t-black/50">
+                      <div
+                        className={`absolute top-0 left-0 h-full bg-gradient-to-r ${criterion.color} transition-all duration-300 ease-out opacity-90 group-hover:opacity-100`}
+                        style={{ width: `${pct}%` }}
+                      />
+                      {/* Tick marks */}
+                      {[25, 50, 75].map((tick) => (
+                        <div
+                          key={tick}
+                          className="absolute top-0 h-full w-px bg-white/5"
+                          style={{ left: `${tick}%` }}
+                        />
+                      ))}
+                      <input
+                        type="range"
+                        min="0"
+                        max={criterion.max}
+                        value={val}
+                        onChange={(e) => handleCriterionChange(criterion.key, parseInt(e.target.value))}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-white/5">
               <button
                 onClick={handleClose}
                 className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-extrabold text-lg rounded-xl transition-all active:scale-95 shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_50px_rgba(139,92,246,0.5)] border border-white/10"
@@ -268,7 +452,6 @@ export function DetailedRatingSelector({
         </div>
       </div>
       
-      {/* Custom Styles for Sliders & Scrollbar */}
       <style dangerouslySetInnerHTML={{__html: `
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;

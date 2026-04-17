@@ -9,6 +9,13 @@ interface StatusSelectorProps {
 
 const STATUSES = ['Not Started', 'Playing', 'Completed', 'Abandoned'];
 
+const STATUS_LABELS: Record<string, string> = {
+  'Not Started': 'Не начата',
+  'Playing': 'Играю',
+  'Completed': 'Пройдена',
+  'Abandoned': 'Заброшена',
+};
+
 export function StatusSelector({ value, onChange }: StatusSelectorProps) {
   const [isSaving, setIsSaving] = useState(false);
 
@@ -26,7 +33,7 @@ export function StatusSelector({ value, onChange }: StatusSelectorProps) {
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-slate-300">
-        Status
+        Статус
       </label>
       <div className="flex flex-wrap gap-2">
         {STATUSES.map((status) => (
@@ -40,7 +47,7 @@ export function StatusSelector({ value, onChange }: StatusSelectorProps) {
                 : 'bg-slate-800 text-slate-300 border-2 border-slate-700 hover:border-violet-500'
             } ${isSaving ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
-            {status}
+            {STATUS_LABELS[status] || status}
           </button>
         ))}
       </div>

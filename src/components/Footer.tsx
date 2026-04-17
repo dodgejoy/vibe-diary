@@ -22,7 +22,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="text-slate-400 text-lg leading-relaxed max-w-sm">
-              Your ultimate personal vault for gaming memories. Track, rate, and celebrate every digital adventure.
+              Ваше персональное хранилище для игровых воспоминаний. Отслеживай, оценивай и сохраняй каждое цифровое приключение.
             </p>
             
             <div className="flex items-center gap-4 mt-8">
@@ -39,25 +39,19 @@ export function Footer() {
           <div>
             <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-fuchsia-500" />
-              Navigation
+              Навигация
             </h3>
             <ul className="space-y-4 font-medium">
               <li>
                 <Link href="/" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
                   <span className="w-0 h-[1px] bg-violet-400 group-hover:w-4 transition-all duration-300" />
-                  Library
-                </Link>
-              </li>
-              <li>
-                <Link href="/achievements" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
-                  <span className="w-0 h-[1px] bg-violet-400 group-hover:w-4 transition-all duration-300" />
-                  Achievements
+                  Библиотека
                 </Link>
               </li>
               <li>
                 <Link href="/add-game" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 group">
                   <span className="w-0 h-[1px] bg-violet-400 group-hover:w-4 transition-all duration-300" />
-                  Add New Game
+                  Добавить игру
                 </Link>
               </li>
             </ul>
@@ -67,7 +61,7 @@ export function Footer() {
           <div>
             <h3 className="text-white font-bold text-lg mb-6 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              Powered By
+              Работает на
             </h3>
             <div className="space-y-3">
               <a
@@ -78,7 +72,7 @@ export function Footer() {
               >
                 <div className="flex flex-col">
                   <span className="text-white font-bold">RAWG API</span>
-                  <span className="text-xs text-slate-500 font-medium">Database & Cover arts</span>
+                  <span className="text-xs text-slate-500 font-medium">База данных и обложки</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-white transition-colors" />
               </a>
@@ -90,7 +84,7 @@ export function Footer() {
               >
                 <div className="flex flex-col">
                   <span className="text-emerald-400 font-bold">Supabase</span>
-                  <span className="text-xs text-slate-500 font-medium">Backend & Auth</span>
+                  <span className="text-xs text-slate-500 font-medium">Бэкенд и аутентификация</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-emerald-400 transition-colors" />
               </a>
@@ -104,7 +98,7 @@ export function Footer() {
                   <span className="text-indigo-400 font-bold flex items-center gap-1.5">
                     <GitBranch size={14} /> GitHub
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">Version Control</span>
+                  <span className="text-xs text-slate-500 font-medium">Контроль версий</span>
                 </div>
                 <ExternalLink size={16} className="text-slate-500 group-hover:text-indigo-400 transition-colors" />
               </a>
@@ -113,7 +107,7 @@ export function Footer() {
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 font-black flex items-center gap-1.5 drop-shadow-md">
                     <Sparkles size={14} className="text-fuchsia-400" /> Antigravity
                   </span>
-                  <span className="text-[10px] uppercase font-bold text-violet-400/80 tracking-wider">AI Coding Assistant</span>
+                  <span className="text-[10px] uppercase font-bold text-violet-400/80 tracking-wider">ИИ-ассистент</span>
                 </div>
                 <Heart size={16} className="text-fuchsia-500/50 group-hover:text-fuchsia-500 group-hover:fill-fuchsia-500 transition-colors" />
               </div>
@@ -124,13 +118,13 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-slate-500 font-medium text-sm flex items-center">
-            &copy; {new Date().getFullYear()} Vibe Diary. All rights reserved.
+            &copy; {new Date().getFullYear()} Vibe Diary. Все права защищены.
           </div>
           
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-900 rounded-full border border-slate-800/80 text-sm font-medium text-slate-400">
-            Crafted with 
+            Создано с 
             <Heart size={16} className="text-rose-500 fill-rose-500 animate-pulse drop-shadow-[0_0_8px_rgba(243,24,103,0.5)]" /> 
-            for gamers
+            для геймеров
           </div>
         </div>
       </div>

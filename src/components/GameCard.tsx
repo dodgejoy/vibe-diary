@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Game } from '@/lib/supabase';
+import { Game, getNormalizedScore } from '@/lib/supabase';
 import { StatusBadge } from './StatusBadge';
 import { ChevronRight, Gamepad2 } from 'lucide-react';
 
@@ -26,28 +26,12 @@ export function GameCard({ game }: GameCardProps) {
             />
           ) : (
             <div className="flex items-center justify-center h-full bg-gradient-to-br from-slate-800 to-slate-900 text-slate-400">
-              <span className="text-sm">No Cover Image</span>
+              <span className="text-sm">Нет обложки</span>
             </div>
           )}
           {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-70 group-hover:opacity-50 transition-opacity" />
 
-          {/* Logo Badge */}
-          {game.logo_url && (
-            <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md rounded-lg p-2 shadow-lg hover:bg-white transition-all group-hover:shadow-xl">
-              <Image
-                src={game.logo_url}
-                alt={`${game.title} logo`}
-                width={40}
-                height={40}
-                className="object-contain w-auto h-auto max-w-[40px] max-h-[40px]"
-                onError={(e) => {
-                  // Hide logo if it fails to load
-                  (e.target as HTMLElement).parentElement?.style.setProperty('display', 'none');
-                }}
-              />
-            </div>
-          )}
         </div>
 
         {/* Content Container */}
@@ -73,7 +57,7 @@ export function GameCard({ game }: GameCardProps) {
 
             {game.detailed_ratings && (
               <div className="text-xs font-bold px-2 py-1 bg-gradient-to-r from-yellow-500/80 to-yellow-600/80 rounded text-white backdrop-blur-sm">
-                ⭐ {((Object.values(game.detailed_ratings).reduce((a, b) => a + b, 0) / 90) * 10).toFixed(1)}/10
+                ⭐ {getNormalizedScore(game.detailed_ratings).toFixed(1)}/10
               </div>
             )}
           </div>

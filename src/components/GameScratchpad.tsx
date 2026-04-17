@@ -29,7 +29,7 @@ export function GameScratchpad({ gameId }: { gameId: string }) {
         <button
           onClick={handleSave}
           className="text-amber-500/70 hover:text-amber-400 transition-colors"
-          title="Save notes (also saves in your browser)"
+          title="Сохранить заметки (также сохраняется в браузере)"
         >
           {isSaved ? <Check size={16} className="text-emerald-400" /> : <Save size={16} />}
         </button>

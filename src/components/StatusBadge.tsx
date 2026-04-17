@@ -14,7 +14,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <ClockIcon size={14} />
       ),
-      label: 'Not Started',
+      label: 'Не начата',
     },
     'Playing': {
       bg: 'bg-violet-600',
@@ -22,7 +22,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <PlayCircleIcon size={14} />
       ),
-      label: 'Playing',
+      label: 'Играю',
     },
     'Completed': {
       bg: 'bg-emerald-600',
@@ -30,7 +30,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <CheckCircleIcon size={14} />
       ),
-      label: 'Completed',
+      label: 'Пройдена',
     },
     'Abandoned': {
       bg: 'bg-red-600',
@@ -38,7 +38,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       icon: (
         <XCircleIcon size={14} />
       ),
-      label: 'Abandoned',
+      label: 'Заброшена',
     },
   };
 

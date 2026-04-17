@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Game Diary - Your Personal Gaming Journal",
-  description: "Keep track of your gaming journey with Game Diary. A modern, dark-themed app for your game notes and progress.",
+  title: "Vibe Diary — Твой Игровой Дневник",
+  description: "Отслеживай свой игровой путь с Vibe Diary. Современное приложение для заметок, рецензий и прогресса в играх.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ru"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
       data-scroll-behavior="smooth"
     >

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Gamepad2, Plus, Home, Trophy, LogOut, UserCircle2, Shield } from 'lucide-react';
+import { Gamepad2, Plus, Home, LogOut, UserCircle2, Shield, Flame } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from './AuthProvider';
 
@@ -12,9 +12,9 @@ export function Header() {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const navItems = [
-    { name: 'Library', path: '/', icon: Home },
-    { name: 'Achievements', path: '/achievements', icon: Trophy },
-    ...(isAdmin ? [{ name: 'Admin', path: '/admin', icon: Shield }] : []),
+    { name: 'Библиотека', path: '/', icon: Home },
+    { name: 'Популярное', path: '/popular', icon: Flame },
+    ...(isAdmin ? [{ name: 'Админ', path: '/admin', icon: Shield }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -27,7 +27,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-white/5 shadow-2xl">
+    <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-white/5 shadow-2xl">
       {/* Top glowing line */}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-violet-500/50 to-transparent" />
       
@@ -43,15 +43,17 @@ export function Header() {
               VIBE DIARY
             </span>
             <span className="text-[10px] font-bold tracking-[0.2em] text-violet-400 uppercase -mt-1">
-              Personal Vault
+              Личное Хранилище
             </span>
           </div>
         </Link>
 
         <nav className="flex items-center gap-2 sm:gap-4">
-          {user && (
-            <div className="hidden md:flex items-center p-1 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-              {navItems.map((item) => {
+          {/* Nav links — show Популярное to everyone, Библиотека/Админ only to authenticated */}
+          <div className="hidden md:flex items-center p-1 bg-slate-900/50 rounded-2xl border border-slate-800/50">
+            {navItems
+              .filter(item => item.path === '/popular' || user)
+              .map((item) => {
                 const isActive = pathname === item.path;
                 return (
                   <Link
@@ -68,8 +70,7 @@ export function Header() {
                   </Link>
                 );
               })}
-            </div>
-          )}
+          </div>
 
           {!isLoading && !user && (
             <Link
@@ -77,7 +78,7 @@ export function Header() {
               className="group relative flex items-center gap-2 px-5 py-2.5 bg-white text-slate-950 font-bold rounded-xl transition-all duration-300 hover:scale-105 hover:bg-slate-100 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
             >
               <UserCircle2 size={20} strokeWidth={2.5} className="text-violet-600" />
-              <span>Sign In</span>
+              <span>Войти</span>
             </Link>
           )}
 
@@ -99,7 +100,7 @@ export function Header() {
               >
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-violet-400 to-fuchsia-400 opacity-0 group-hover:opacity-20 transition-opacity blur-md" />
                 <Plus size={20} strokeWidth={3} className="text-violet-600" />
-                <span className="hidden sm:inline">Add Game</span>
+                <span className="hidden sm:inline">Добавить игру</span>
               </Link>
 
               <button
@@ -108,7 +109,7 @@ export function Header() {
                 className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white rounded-xl transition-all disabled:opacity-60"
               >
                 <LogOut size={18} className="text-rose-400" />
-                <span className="hidden sm:inline">{isSigningOut ? 'Signing out...' : 'Sign Out'}</span>
+                <span className="hidden sm:inline">{isSigningOut ? 'Выход...' : 'Выйти'}</span>
               </button>
             </>
           )}

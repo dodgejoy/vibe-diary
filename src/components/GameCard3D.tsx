@@ -2,10 +2,10 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Game } from '@/lib/supabase';
+import { Game, getNormalizedScore } from '@/lib/supabase';
 import { StatusBadge } from './StatusBadge';
 import { Heart, Star } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 
 interface GameCard3DProps {
   game: Game;
@@ -13,13 +13,13 @@ interface GameCard3DProps {
   onToggleFavorite?: (gameId: string) => void;
 }
 
-export function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameCard3DProps) {
+export const GameCard3D = memo(function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameCard3DProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return;
 
     const rect = cardRef.current.getBoundingClientRect();
@@ -29,17 +29,17 @@ export function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameC
     const xPct = (x / rect.width) * 100;
     const yPct = (y / rect.height) * 100;
     setMousePos({ x: xPct, y: yPct });
-  };
+  }, []);
 
   const handleMouseLeave = () => {
     setIsHovered(false);
   };
 
   const totalScore = game.detailed_ratings
-    ? Object.values(game.detailed_ratings).reduce((a, b) => a + b, 0)
+    ? Object.values(game.detailed_ratings).reduce((a, b) => a + (b ?? 0), 0)
     : null;
 
-  const normalizedScore = totalScore !== null ? ((totalScore / 90) * 10).toFixed(1) : null;
+  const normalizedScore = game.detailed_ratings ? getNormalizedScore(game.detailed_ratings).toFixed(1) : null;
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return { text: 'text-yellow-400', border: 'border-yellow-500/30', bg: 'bg-yellow-500/10' };
@@ -94,7 +94,7 @@ export function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameC
               onToggleFavorite?.(game.id);
             }}
             className="p-2.5 rounded-full bg-slate-950/70 backdrop-blur-md border border-white/10 hover:bg-slate-900 transition-all shadow-xl"
-            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label={isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'}
           >
             <Heart
               size={16}
@@ -135,26 +135,11 @@ export function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameC
               />
             ) : (
               <div className="flex items-center justify-center h-full bg-slate-800/50 text-slate-500">
-                <span className="text-sm font-medium tracking-widest uppercase">No Cover</span>
+                <span className="text-sm font-medium tracking-widest uppercase">Нет обложки</span>
               </div>
             )}
 
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-300" />
-
-            {game.logo_url && (
-              <div className="absolute bottom-4 left-4 right-4 flex justify-center z-20 pointer-events-none transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                <Image
-                  src={game.logo_url}
-                  alt={`${game.title} logo`}
-                  width={140}
-                  height={60}
-                  className="object-contain max-h-[60px] drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]"
-                  onError={(e) => {
-                    (e.target as HTMLElement).parentElement?.style.setProperty('display', 'none');
-                  }}
-                />
-              </div>
-            )}
           </div>
 
           <div className="p-5 space-y-4 relative z-30 bg-slate-900">
@@ -201,4 +186,4 @@ export function GameCard3D({ game, isFavorite = false, onToggleFavorite }: GameC
       </div>
     </div>
   );
-}
+});

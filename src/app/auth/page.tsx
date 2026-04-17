@@ -35,7 +35,7 @@ function AuthPageContent() {
     setMessage(null);
 
     if (mode === 'signup' && password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Пароли не совпадают.');
       return;
     }
 
@@ -60,8 +60,8 @@ function AuthPageContent() {
 
       setMessage(
         result.needsEmailConfirmation
-          ? 'Account created. Check your email to confirm the address before signing in.'
-          : 'Account created. You can start using Vibe Diary now.'
+          ? 'Аккаунт создан. Проверьте почту для подтверждения адреса перед входом.'
+          : 'Аккаунт создан. Вы можете начать использовать Vibe Diary.'
       );
     } finally {
       setIsSubmitting(false);
@@ -78,34 +78,34 @@ function AuthPageContent() {
           <div className="relative z-10 space-y-8">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/70 border border-white/10 text-violet-300 text-sm font-semibold">
               <Gamepad2 size={18} />
-              Vibe Diary Account
+              Аккаунт Vibe Diary
             </div>
 
             <div className="space-y-4 max-w-xl">
               <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-                Save your library,
+                Сохрани свою библиотеку,
                 <br />
-                ratings, and progress.
+                оценки и прогресс.
               </h1>
               <p className="text-lg text-slate-400 leading-relaxed">
-                Accounts keep your diary private and attach every game, review, achievement, and future profile feature to your own collection.
+                Аккаунт хранит ваш дневник в безопасности и привязывает каждую игру, рецензию и профиль к вашей коллекции.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Personal library stays scoped to your account.
+                Личная библиотека привязана к вашему аккаунту.
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Achievements now track the real signed-in user.
+                Отслеживание прогресса для авторизованного пользователя.
               </div>
               <div className="rounded-2xl border border-white/10 bg-slate-900/50 p-4 text-slate-300">
-                Future analytics and sharing can build on stable profiles.
+                Аналитика и шаринг на основе стабильных профилей.
               </div>
             </div>
 
             <Link href="/" className="inline-flex text-sm text-slate-400 hover:text-white transition-colors">
-              Back to home
+              На главную
             </Link>
           </div>
         </div>
@@ -118,7 +118,7 @@ function AuthPageContent() {
                 mode === 'signin' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Sign In
+              Войти
             </button>
             <button
               onClick={() => setMode('signup')}
@@ -126,13 +126,13 @@ function AuthPageContent() {
                 mode === 'signup' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Create Account
+              Создать аккаунт
             </button>
           </div>
 
           {!isConfigured ? (
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5 text-amber-100">
-              Add your Supabase URL and anon key in the environment before using accounts.
+              Добавьте Supabase URL и anon key в переменные окружения перед использованием аккаунтов.
             </div>
           ) : isLoading ? (
             <div className="min-h-72 flex items-center justify-center">
@@ -154,13 +154,13 @@ function AuthPageContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Пароль</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
-                  placeholder="At least 6 characters"
+                  placeholder="Минимум 6 символов"
                   autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                   minLength={6}
                   required
@@ -169,13 +169,13 @@ function AuthPageContent() {
 
               {mode === 'signup' && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Подтвердите пароль</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(event) => setConfirmPassword(event.target.value)}
                     className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500"
-                    placeholder="Repeat your password"
+                    placeholder="Повторите пароль"
                     autoComplete="new-password"
                     minLength={6}
                     required
@@ -203,17 +203,17 @@ function AuthPageContent() {
                 {isSubmitting ? (
                   <>
                     <Loader className="animate-spin" size={18} />
-                    Processing...
+                    Обработка...
                   </>
                 ) : mode === 'signin' ? (
                   <>
                     <LogIn size={18} />
-                    Sign In
+                    Войти
                   </>
                 ) : (
                   <>
                     <UserPlus size={18} />
-                    Create Account
+                    Создать аккаунт
                   </>
                 )}
               </button>
