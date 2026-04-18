@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Loader, LockKeyhole, ShieldAlert, ShieldX } from 'lucide-react';
+import { Loader, LockKeyhole, ShieldAlert, ShieldX, Wrench } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAdmin, isLoading, isConfigured } = useAuth();
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
 
   const isAuthRoute = pathname === '/auth';
   const isAdminRoute = pathname?.startsWith('/admin');
@@ -24,7 +26,40 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, [isPublicRoute, isConfigured, isLoading, pathname, router, user]);
 
   if (isPublicRoute) {
+    // Maintenance mode — show notice for non-admins on all routes
+    if (settings.general.maintenanceMode && !isAdmin && !isAuthRoute) {
+      return (
+        <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+          <div className="max-w-xl w-full bg-slate-900/60 border border-amber-500/20 rounded-3xl p-8 shadow-2xl backdrop-blur-xl text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-6">
+              <Wrench size={28} />
+            </div>
+            <h1 className="text-3xl font-extrabold text-white mb-3">{t('authGate.maintenance')}</h1>
+            <p className="text-slate-400 leading-relaxed">
+              {t('authGate.maintenanceDesc')}
+            </p>
+          </div>
+        </div>
+      );
+    }
     return <>{children}</>;
+  }
+
+  // Maintenance mode — block non-admins on protected routes too
+  if (settings.general.maintenanceMode && !isAdmin) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+        <div className="max-w-xl w-full bg-slate-900/60 border border-amber-500/20 rounded-3xl p-8 shadow-2xl backdrop-blur-xl text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-6">
+            <Wrench size={28} />
+          </div>
+          <h1 className="text-3xl font-extrabold text-white mb-3">{t('authGate.maintenance')}</h1>
+          <p className="text-slate-400 leading-relaxed">
+            {t('authGate.maintenanceDesc')}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!isConfigured) {

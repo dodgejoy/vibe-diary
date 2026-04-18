@@ -39,7 +39,13 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "b.thumbs.redditmedia.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
     ],
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   headers: async () => [
     {

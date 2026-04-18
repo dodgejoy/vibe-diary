@@ -130,3 +130,16 @@ body::before {
   }
 }
 
+/* Disable animations when admin setting is off */
+body.no-animations *,
+body.no-animations *::before,
+body.no-animations *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+/* Disable noise overlay when particles/effects are off */
+body.no-particles::before {
+  display: none !important;
+}
+

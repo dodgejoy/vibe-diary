@@ -5,11 +5,34 @@ import { PopularGame, fetchPopularGames } from '@/lib/supabase';
 import { Flame, Users, Star, TrendingUp, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 export default function PopularPage() {
   const [games, setGames] = useState<PopularGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation();
+  const { isFeatureEnabled } = useSiteSettings();
+
+  if (!isFeatureEnabled('popularPage')) {
+    return (
+      <div className="min-h-screen bg-slate-950 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-8 group"
+          >
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            {t('common.toHome')}
+          </Link>
+
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-8 text-center shadow-2xl">
+            <h1 className="text-3xl font-extrabold text-white mb-3">{t('popular.heading')}</h1>
+            <p className="text-slate-400">Раздел временно отключён в настройках сайта.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     let cancelled = false;

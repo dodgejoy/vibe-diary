@@ -22,3 +22,6 @@ export { SteamDeckCompanion } from './SteamDeckCompanion';
 export { GameShareModal } from './GameShareModal';
 export { PopularGames } from './PopularGames';
 export { InteractiveDemo } from './InteractiveDemo';
+export { AdminControlPanel } from './AdminControlPanel';
+export { AnnouncementBanner } from './AnnouncementBanner';
+export { ContentManager } from './ContentManager';

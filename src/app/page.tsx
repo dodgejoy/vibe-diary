@@ -7,11 +7,13 @@ import { fetchGames, Game } from '@/lib/supabase';
 import { Loader, Plus, Gamepad2, Trophy, Clock, Star, BookOpen, Share2, BarChart3, Search, ArrowRight, Sparkles, UserCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 /* ───────────────────── Guest Landing Page ───────────────────── */
 
 function GuestLanding() {
   const { t } = useTranslation();
+  const { isFeatureEnabled } = useSiteSettings();
   const features = [
     {
       icon: Gamepad2,
@@ -107,12 +109,14 @@ function GuestLanding() {
                 {t('landing.startFree')}
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
-              <Link
-                href="/popular"
-                className="inline-flex items-center gap-2 px-6 py-4 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-slate-200 hover:text-white font-semibold rounded-2xl transition-all text-lg"
-              >
-                {t('common.popularGames')}
-              </Link>
+              {isFeatureEnabled('popularPage') && (
+                <Link
+                  href="/popular"
+                  className="inline-flex items-center gap-2 px-6 py-4 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 text-slate-200 hover:text-white font-semibold rounded-2xl transition-all text-lg"
+                >
+                  {t('common.popularGames')}
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -185,10 +189,10 @@ function GuestLanding() {
       </section>
 
       {/* Interactive Demo */}
-      <InteractiveDemo />
+      {isFeatureEnabled('interactiveDemo') && <InteractiveDemo />}
 
       {/* Popular section */}
-      <PopularGames />
+      {isFeatureEnabled('popularPage') && <PopularGames />}
     </div>
   );
 }
@@ -224,6 +228,7 @@ export default function Home() {
 function AuthenticatedHome() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { isFeatureEnabled } = useSiteSettings();
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -411,7 +416,7 @@ function AuthenticatedHome() {
       </section>
 
       {/* Popular on Vibe Diary */}
-      <PopularGames />
+      {isFeatureEnabled('popularPage') && <PopularGames />}
     </div>
   );
 }

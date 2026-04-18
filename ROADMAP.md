@@ -1,7 +1,7 @@
 # 🗺️ Development Roadmap
 
-## Current Version: 1.0
-**Status**: Feature Complete - Ready for Beta Testing
+## Current Version: 1.0.1a
+**Status**: Patch Release - Stabilized 1.0.1 settings and routing behavior
 
 ---
 

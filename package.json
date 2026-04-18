@@ -1,8 +1,8 @@
 {
   "name": "vibe-diary",
-  "version": "1.0.0",
+  "version": "1.0.1-a",
   "private": true,
-  "scripts": {
+  "scripts": {    
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

@@ -7,12 +7,17 @@ import { Gamepad2, Loader, LogIn, UserPlus } from 'lucide-react';
 import { signInWithEmail, signUpWithEmail } from '@/lib/supabase';
 import { useAuth } from '@/components';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 function AuthPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading, isConfigured } = useAuth();
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+
+  const isMaintenanceMode = settings.general.maintenanceMode;
+  const registrationOpen = settings.general.registrationOpen && !isMaintenanceMode;
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -38,6 +43,11 @@ function AuthPageContent() {
 
     if (mode === 'signup' && password !== confirmPassword) {
       setError(t('auth.passwordMismatch'));
+      return;
+    }
+
+    if (mode === 'signup' && !registrationOpen) {
+      setError(t('auth.registrationClosed'));
       return;
     }
 
@@ -113,6 +123,13 @@ function AuthPageContent() {
         </div>
 
         <div className="rounded-[2rem] border border-white/10 bg-slate-900/70 backdrop-blur-xl p-8 shadow-2xl">
+          {isMaintenanceMode && (
+            <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+              <div className="font-semibold">{t('authGate.maintenance')}</div>
+              <div className="mt-1 text-amber-200/90">{t('authGate.maintenanceDesc')}</div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 bg-slate-950/70 border border-white/5 rounded-2xl p-1 mb-8">
             <button
               onClick={() => setMode('signin')}
@@ -124,9 +141,13 @@ function AuthPageContent() {
             </button>
             <button
               onClick={() => setMode('signup')}
+              disabled={!registrationOpen}
               className={`flex-1 rounded-xl px-4 py-3 font-semibold transition-all ${
-                mode === 'signup' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
+                !registrationOpen
+                  ? 'text-slate-600 cursor-not-allowed'
+                  : mode === 'signup' ? 'bg-white text-slate-950' : 'text-slate-400 hover:text-white'
               }`}
+              title={!registrationOpen ? t('auth.registrationClosed') : undefined}
             >
               {t('auth.createAccountTab')}
             </button>

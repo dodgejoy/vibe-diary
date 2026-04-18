@@ -1,5 +1,6 @@
 const RAWG_BASE_URL = 'https://api.rawg.io/api';
 const RAWG_API_KEY = process.env.NEXT_PUBLIC_RAWG_API_KEY || '';
+const RAWG_TIMEOUT_MS = 8000;
 
 // Simple in-memory cache to avoid redundant API calls
 const cache = new Map<string, { data: unknown; ts: number }>();
@@ -22,7 +23,17 @@ async function rawgFetch(path: string, params: Record<string, string | number> =
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, String(v));
   }
-  const res = await fetch(url.toString());
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), RAWG_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(url.toString(), { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+
   if (!res.ok) throw new Error(`RAWG API error: ${res.status}`);
   return res.json();
 }
@@ -131,14 +142,8 @@ export async function getGameRedditPosts(id: number): Promise<any[]> {
       return [];
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    try {
-      const data = await rawgFetch(`/games/${id}/reddit`, { page_size: 10 });
-      return data.results || [];
-    } finally {
-      clearTimeout(timeout);
-    }
+    const data = await rawgFetch(`/games/${id}/reddit`, { page_size: 10 });
+    return data.results || [];
   } catch {
     return [];
   }

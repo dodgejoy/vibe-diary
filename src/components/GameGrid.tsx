@@ -2,10 +2,12 @@
 
 import { Game, getNormalizedScore } from '@/lib/supabase';
 import { GameCard3D } from './GameCard3D';
+import { GameCard } from './GameCard';
 import { useEffect, useMemo, useState } from 'react';
 import { Filter, Heart, RotateCcw, Search, SlidersHorizontal, Sparkles, Star } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 interface GameGridProps {
   games: Game[];
@@ -26,6 +28,7 @@ function getNormalizedRating(game: Game): number {
 export function GameGrid({ games }: GameGridProps) {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [collectionFilter, setCollectionFilter] = useState<CollectionFilter>('all');
@@ -301,15 +304,19 @@ export function GameGrid({ games }: GameGridProps) {
       {/* Game Grid */}
       {sortedGames.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-max">
-          {sortedGames.map((game) => (
-            <div key={game.id} style={{ perspective: '1000px' }}>
-              <GameCard3D
-                game={game}
-                isFavorite={favoriteGameIds.has(game.id)}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            </div>
-          ))}
+          {sortedGames.map((game) =>
+            settings.appearance.cardStyle === 'flat' ? (
+              <GameCard key={game.id} game={game} />
+            ) : (
+              <div key={game.id} style={settings.appearance.cardStyle === '3d' ? { perspective: '1000px' } : undefined}>
+                <GameCard3D
+                  game={game}
+                  isFavorite={favoriteGameIds.has(game.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </div>
+            )
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-96 text-center">

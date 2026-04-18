@@ -117,7 +117,8 @@
     "removeFromDiary": "Удалить из дневника",
     "addedToDiary": "Добавлена в дневник",
     "lastUpdated": "Последнее обновление",
-    "screenshots": "Скриншоты"
+    "screenshots": "Скриншоты",
+    "adminDescription": "Описание от редакции"
   },
 
   "popular": {
@@ -145,6 +146,7 @@
 
   "auth": {
     "passwordMismatch": "Пароли не совпадают.",
+    "registrationClosed": "Регистрация временно закрыта.",
     "accountCreatedConfirmEmail": "Аккаунт создан. Проверьте почту для подтверждения адреса перед входом.",
     "accountCreatedReady": "Аккаунт создан. Вы можете начать использовать Vibe Diary.",
     "accountTitle": "Аккаунт Vibe Diary",
@@ -423,7 +425,96 @@
     "notConfiguredDesc": "Для работы аккаунтов требуются NEXT_PUBLIC_SUPABASE_URL и NEXT_PUBLIC_SUPABASE_ANON_KEY в переменных окружения.",
     "checkingAccount": "Проверяем ваш аккаунт...",
     "adminRequired": "Требуется доступ администратора",
-    "adminRequiredDesc": "Эта область доступна только для аккаунтов с ролью админ."
+    "adminRequiredDesc": "Эта область доступна только для аккаунтов с ролью админ.",
+    "maintenance": "Режим обслуживания",
+    "maintenanceDesc": "Сайт временно недоступен. Ведутся технические работы — попробуйте позже."
+  },
+
+  "controlPanel": {
+    "title": "Панель управления",
+    "subtitle": "Визуальное управление сайтом без кода",
+    "badge": "Alpha",
+    "tabs": {
+      "general": "Основное",
+      "appearance": "Внешний вид",
+      "features": "Функции",
+      "announcements": "Объявления"
+    },
+    "unsavedChanges": "Есть несохранённые изменения",
+    "resetDefaults": "Сбросить",
+    "saving": "Сохранение...",
+    "saved": "Сохранено!",
+    "general": {
+      "siteInfo": "Информация о сайте",
+      "siteName": "Название сайта",
+      "siteDescription": "Описание сайта",
+      "maxGames": "Макс. игр на пользователя",
+      "access": "Доступ и безопасность",
+      "maintenance": "Режим обслуживания",
+      "maintenanceDesc": "Сайт будет недоступен для обычных пользователей",
+      "registration": "Открытая регистрация",
+      "registrationDesc": "Разрешить новым пользователям создавать аккаунты",
+      "defaultLang": "Язык по умолчанию"
+    },
+    "appearance": {
+      "accentColor": "Акцентный цвет",
+      "layout": "Макет и стиль",
+      "headerStyle": "Стиль шапки",
+      "header_default": "Стандарт",
+      "header_compact": "Компакт",
+      "header_minimal": "Минимал",
+      "cardStyle": "Стиль карточек",
+      "card_default": "Стандарт",
+      "card_3d": "3D",
+      "card_flat": "Плоский",
+      "corners": "Скругление углов",
+      "radius_small": "Малое",
+      "radius_medium": "Среднее",
+      "radius_large": "Большое",
+      "effects": "Эффекты",
+      "animations": "Анимации",
+      "animationsDesc": "Плавные переходы и hover-эффекты",
+      "particles": "Частицы",
+      "particlesDesc": "Декоративные фоновые эффекты",
+      "preview": "Превью"
+    },
+    "features": {
+      "active": "Активных",
+      "communityRatings": "Рейтинги сообщества",
+      "communityRatingsDesc": "Агрегированные оценки от всех пользователей",
+      "discussions": "Обсуждения",
+      "discussionsDesc": "Комментарии и дискуссии на странице игры",
+      "steamDeck": "Steam Deck",
+      "steamDeckDesc": "Информация о совместимости со Steam Deck",
+      "screenshots": "Скриншоты",
+      "screenshotsDesc": "Галерея скриншотов на странице игры",
+      "reviews": "Рецензии",
+      "reviewsDesc": "Развёрнутые обзоры с плюсами и минусами",
+      "sharing": "Поделиться",
+      "sharingDesc": "Генерация красивых карточек для соцсетей",
+      "similarGames": "Похожие игры",
+      "similarGamesDesc": "Рекомендации похожих игр",
+      "popularPage": "Популярные игры",
+      "popularPageDesc": "Отдельная страница с топ-играми сообщества",
+      "interactiveDemo": "Интерактивное демо",
+      "interactiveDemoDesc": "Демонстрация функций для гостей на главной"
+    },
+    "announcements": {
+      "settings": "Настройки баннера",
+      "showBanner": "Показывать баннер",
+      "showBannerDesc": "Отображать объявление на всех страницах",
+      "text": "Текст объявления",
+      "textPlaceholder": "Напишите сообщение для пользователей...",
+      "type": "Тип баннера",
+      "type_info": "Инфо",
+      "type_warning": "Важно",
+      "type_success": "Успех",
+      "dismissible": "Можно закрыть",
+      "dismissibleDesc": "Пользователи смогут скрыть баннер",
+      "preview": "Превью баннера",
+      "disabled": "Баннер отключён",
+      "emptyText": "Введите текст объявления"
+    }
   },
 
   "demo": {
@@ -488,5 +579,30 @@
       "avgScore": "Средний балл",
       "topGenre": "Любимый жанр"
     }
+  },
+
+  "contentManager": {
+    "tab": "Контент",
+    "title": "Управление контентом",
+    "subtitle": "Добавляйте логотипы, описания, скриншоты и теги для игр",
+    "searchPlaceholder": "Найти игру для добавления контента...",
+    "empty": "Пока нет кастомного контента",
+    "emptyHint": "Найдите игру через поиск выше и добавьте свой контент",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "deleteAll": "Удалить весь контент",
+    "logo": "Логотип",
+    "uploadLogo": "Загрузить логотип",
+    "banner": "Баннер",
+    "uploadBanner": "Загрузить баннер",
+    "description": "Описание",
+    "descriptionPlaceholder": "Дополнительное описание игры от редакции...",
+    "tags": "Теги",
+    "tagPlaceholder": "Новый тег...",
+    "screenshots": "Скриншоты",
+    "addScreenshot": "Добавить",
+    "hasDescription": "Есть описание",
+    "viewPage": "Открыть страницу",
+    "saved": "Контент сохранён!"
   }
 }

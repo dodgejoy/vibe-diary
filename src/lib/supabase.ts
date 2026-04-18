@@ -32,6 +32,27 @@ if (isSupabaseConfigured) {
 
 export { supabase };
 
+const QUERY_TIMEOUT_MS = 8000;
+
+function withTimeout(promise: PromiseLike<any>, timeoutMs: number, label: string): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      }
+    );
+  });
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   if (!isSupabaseConfigured) {
     return null;
@@ -114,11 +135,15 @@ export async function fetchCurrentUserProfile(userId?: string): Promise<UserProf
     return null;
   }
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', resolvedUserId)
-    .single();
+  const { data, error } = await withTimeout(
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', resolvedUserId)
+      .single(),
+    QUERY_TIMEOUT_MS,
+    'Fetching current user profile'
+  );
 
   if (error) {
     if (error.code !== 'PGRST116') {
@@ -256,7 +281,11 @@ export async function fetchPopularGames(limit = 12): Promise<PopularGame[]> {
   if (!isSupabaseConfigured) return [];
 
   try {
-    const { data, error } = await supabase.rpc('get_popular_games', { result_limit: limit });
+    const { data, error } = await withTimeout(
+      supabase.rpc('get_popular_games', { result_limit: limit }),
+      QUERY_TIMEOUT_MS,
+      'Fetching popular games'
+    );
     if (error) throw error;
     return (data as PopularGame[]) || [];
   } catch (error) {
@@ -283,7 +312,11 @@ export async function fetchCommunityRatings(rawgId: number): Promise<CommunityRa
   if (!isSupabaseConfigured) return null;
 
   try {
-    const { data, error } = await supabase.rpc('get_community_ratings', { game_rawg_id: rawgId });
+    const { data, error } = await withTimeout(
+      supabase.rpc('get_community_ratings', { game_rawg_id: rawgId }),
+      QUERY_TIMEOUT_MS,
+      'Fetching community ratings'
+    );
     if (error) throw error;
     const row = data?.[0];
     if (!row || row.rater_count === 0) return null;
@@ -299,11 +332,15 @@ export async function fetchGames(knownUserId?: string): Promise<Game[]> {
   try {
     const userId = knownUserId ?? await requireUserId();
 
-    const { data, error } = await supabase
-      .from('games')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('games')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false }),
+      QUERY_TIMEOUT_MS,
+      'Fetching games'
+    );
 
     if (error) throw error;
     return data || [];
@@ -318,12 +355,16 @@ export async function fetchGameById(id: string, knownUserId?: string): Promise<G
   try {
     const userId = knownUserId ?? await requireUserId();
 
-    const { data, error } = await supabase
-      .from('games')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('games')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .single(),
+      QUERY_TIMEOUT_MS,
+      'Fetching game'
+    );
 
     if (error) throw error;
     return data;
@@ -337,6 +378,25 @@ export async function fetchGameById(id: string, knownUserId?: string): Promise<G
 export async function addGame(game: Omit<Game, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<Game | null> {
   try {
     const userId = await requireUserId();
+
+    const rawSettings = await fetchSiteSettings();
+    const maxGamesPerUser = typeof rawSettings?.general?.maxGamesPerUser === 'number'
+      ? Math.max(1, rawSettings.general.maxGamesPerUser)
+      : 500;
+
+    const { count, error: countError } = await withTimeout(
+      supabase
+        .from('games')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId),
+      QUERY_TIMEOUT_MS,
+      'Counting user games'
+    );
+
+    if (countError) throw countError;
+    if ((count ?? 0) >= maxGamesPerUser) {
+      throw new Error(`Game limit reached (${maxGamesPerUser}).`);
+    }
 
     const { data, error } = await supabase
       .from('games')
@@ -406,5 +466,202 @@ export async function deleteAnyGameAsAdmin(id: string): Promise<{ error: string 
   } catch (error: any) {
     console.error('Error deleting game as admin:', error);
     return { error: error?.message ?? 'Failed to delete game.' };
+  }
+}
+
+// ─── Site Settings ───
+
+export async function fetchSiteSettings(): Promise<Record<string, any> | null> {
+  if (!isSupabaseConfigured) return null;
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('site_settings')
+        .select('settings')
+        .eq('id', 'global')
+        .single(),
+      QUERY_TIMEOUT_MS,
+      'Fetching site settings'
+    );
+
+    if (error) {
+      if (error.code === 'PGRST116' || error.code === '42P01') return null;
+      console.error('Error fetching site settings:', error);
+      return null;
+    }
+
+    return data?.settings ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveSiteSettings(settings: Record<string, any>): Promise<{ error: string | null }> {
+  try {
+    const userId = await requireAdmin();
+
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert({
+        id: 'global',
+        settings,
+        updated_at: new Date().toISOString(),
+        updated_by: userId,
+      });
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error: any) {
+    console.error('Error saving site settings:', error);
+    return { error: error?.message ?? 'Failed to save settings.' };
+  }
+}
+
+// ─── Game Custom Content ───
+
+export interface GameCustomContent {
+  id: string;
+  game_rawg_id: number;
+  game_name: string;
+  logo_url: string | null;
+  banner_url: string | null;
+  description: string | null;
+  tags: string[];
+  screenshots: string[];
+  created_at: string;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+export async function fetchGameCustomContent(rawgId: number): Promise<GameCustomContent | null> {
+  if (!isSupabaseConfigured) return null;
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('game_custom_content')
+        .select('*')
+        .eq('game_rawg_id', rawgId)
+        .single(),
+      QUERY_TIMEOUT_MS,
+      'Fetching game custom content'
+    );
+
+    if (error) {
+      if (error.code === 'PGRST116' || error.code === '42P01') return null;
+      return null;
+    }
+
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAllGameCustomContent(): Promise<GameCustomContent[]> {
+  if (!isSupabaseConfigured) return [];
+
+  try {
+    const { data, error } = await withTimeout(
+      supabase
+        .from('game_custom_content')
+        .select('*')
+        .order('updated_at', { ascending: false }),
+      QUERY_TIMEOUT_MS,
+      'Fetching all game custom content'
+    );
+
+    if (error) return [];
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function saveGameCustomContent(
+  rawgId: number,
+  gameName: string,
+  content: {
+    logo_url?: string | null;
+    banner_url?: string | null;
+    description?: string | null;
+    tags?: string[];
+    screenshots?: string[];
+  }
+): Promise<{ error: string | null }> {
+  try {
+    const userId = await requireAdmin();
+
+    const { error } = await supabase
+      .from('game_custom_content')
+      .upsert({
+        game_rawg_id: rawgId,
+        game_name: gameName,
+        ...content,
+        updated_at: new Date().toISOString(),
+        updated_by: userId,
+      }, { onConflict: 'game_rawg_id' });
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error: any) {
+    console.error('Error saving game custom content:', error);
+    return { error: error?.message ?? 'Failed to save content.' };
+  }
+}
+
+export async function deleteGameCustomContent(rawgId: number): Promise<{ error: string | null }> {
+  try {
+    await requireAdmin();
+
+    const { error } = await supabase
+      .from('game_custom_content')
+      .delete()
+      .eq('game_rawg_id', rawgId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error: any) {
+    return { error: error?.message ?? 'Failed to delete content.' };
+  }
+}
+
+export async function uploadGameContentFile(
+  file: File,
+  path: string
+): Promise<{ url: string | null; error: string | null }> {
+  try {
+    await requireAdmin();
+
+    const { error: uploadError } = await supabase.storage
+      .from('game-content')
+      .upload(path, file, { upsert: true });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('game-content')
+      .getPublicUrl(path);
+
+    return { url: data.publicUrl, error: null };
+  } catch (error: any) {
+    console.error('Error uploading file:', error);
+    return { url: null, error: error?.message ?? 'Failed to upload file.' };
+  }
+}
+
+export async function deleteGameContentFile(path: string): Promise<{ error: string | null }> {
+  try {
+    await requireAdmin();
+
+    const { error } = await supabase.storage
+      .from('game-content')
+      .remove([path]);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (error: any) {
+    return { error: error?.message ?? 'Failed to delete file.' };
   }
 }

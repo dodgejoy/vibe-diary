@@ -2,7 +2,74 @@
 
 All notable changes to Game Diary are documented in this file.
 
-## [1.0.0] - 2024 (Current)
+## [1.0.1a] - 2026-04-18
+### Fixed
+- ✅ Admin sign-in remains accessible during maintenance mode via `/auth`
+- ✅ Popular page feature flag now hides navigation entry and disables `/popular` when turned off
+- ✅ Admin settings now use deep-merge consistently when loading partial saved settings
+- ✅ `maxGamesPerUser` is now enforced when adding games
+- ✅ Release version label updated to `1.0.1a`
+
+### Adjusted
+- ✅ Removed unfinished default language switch from admin UI until multilingual content is ready
+
+## [1.0.1] - 2026-04-18
+### ✨ New Features
+- ✅ **Admin Control Panel** — visual settings management with 4 tabs (General, Appearance, Features, Announcements)
+- ✅ **Site Settings System** — global settings stored in Supabase with localStorage cache for instant rendering
+- ✅ **Content Manager** — admin tool for custom game content (logos, banners, descriptions, tags, screenshots) with file upload to Supabase Storage
+- ✅ **Announcement Banner** — dismissible site-wide banner with 3 styles (info, warning, success)
+- ✅ **Maintenance Mode** — blocks non-admin users with a maintenance notice on all routes
+- ✅ **Registration Gating** — admins can open/close user registration via settings
+- ✅ **Custom Game Content on Game Pages** — displays admin-uploaded banners, logos, descriptions, tags, and screenshots alongside RAWG data
+- ✅ **SVG Logo Support** — SVG files accepted in content uploads, `dangerouslyAllowSVG` configured with sandbox CSP
+
+### 🎨 Design & UX
+- ✅ Dynamic site name in Header and Footer (configurable via admin panel)
+- ✅ 3 header style variants: default, compact, minimal
+- ✅ Card style switching: flat, 3D, default (perspective)
+- ✅ Animation and particle effect toggles
+- ✅ Accent color picker with 8 presets
+- ✅ Border radius customization
+- ✅ Desktop/mobile preview toggle in admin panel
+
+### 🔧 Technical
+- ✅ `SiteSettingsProvider` context with `useSiteSettings()` hook
+- ✅ Deep-merge settings with defaults for forward-compatibility
+- ✅ CSS custom properties applied via `useEffect` (`--accent-color`, `--site-radius`)
+- ✅ `body.no-animations` and `body.no-particles` CSS classes
+- ✅ Supabase Storage bucket `game-content` (public, admin-only write)
+- ✅ Supabase `*.supabase.co` added to Next.js `remotePatterns`
+- ✅ i18n translations for all new features (ru.json)
+
+### 🗄️ New Database Migrations
+- ✅ `database-site-settings.sql` — `site_settings` table with JSONB settings column and admin-only RLS
+- ✅ `database-game-content.sql` — `game_custom_content` table (logo_url, banner_url, description, tags, screenshots) + `game-content` storage bucket with RLS
+
+### 📦 New Files
+- `src/lib/siteSettings.tsx` — settings context and provider
+- `src/components/AdminControlPanel.tsx` — admin settings UI
+- `src/components/ContentManager.tsx` — game content management UI
+- `src/components/AnnouncementBanner.tsx` — dismissible announcement banner
+- `db/database-site-settings.sql` — site settings migration
+- `db/database-game-content.sql` — game content migration
+
+### 🔄 Modified Files
+- `src/components/AuthGate.tsx` — maintenance mode check
+- `src/app/auth/page.tsx` — registration gating
+- `src/components/Header.tsx` — dynamic site name, header style variants
+- `src/components/Footer.tsx` — dynamic site name
+- `src/components/GameGrid.tsx` — card style switching
+- `src/app/games/[id]/page.tsx` — custom content display
+- `src/app/admin/page.tsx` — 3 tabs (Dashboard, Control Panel, Content)
+- `src/lib/supabase.ts` — new CRUD functions for settings and content
+- `src/app/globals.css` — animation/particle disable classes
+- `next.config.ts` — SVG support, Supabase remote patterns
+- `src/i18n/locales/ru.json` — new translation keys
+
+---
+
+## [1.0.0] - 2024
 ### ✨ Major Features
 - ✅ Supabase PostgreSQL database integration
 - ✅ RAWG Video Games Database API integration (7,000+ games)
@@ -116,6 +183,16 @@ ALTER TABLE games ADD COLUMN IF NOT EXISTS logo_url TEXT;
 ---
 
 ## 🎯 Version History
+
+### v1.0.1
+**Release Date**: 2026-04-18
+**Status**: Release
+- Admin Control Panel with global site settings
+- Content Manager for custom game content
+- Announcement banner system
+- Maintenance mode and registration gating
+- SVG logo support
+- Header/card style customization
 
 ### v1.0.0
 **Release Date**: Current

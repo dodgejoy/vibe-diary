@@ -3,9 +3,12 @@
 import Link from 'next/link';
 import { ExternalLink, Heart, Globe, MessageCircle, Gamepad2, GitBranch, Sparkles, Tag } from 'lucide-react';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 export function Footer() {
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const appVersion = '1.0.1a';
   return (
     <footer className="relative border-t border-slate-800/60 bg-slate-950 overflow-hidden pt-16 pb-8">
       {/* Background ambient glow effect */}
@@ -20,7 +23,7 @@ export function Footer() {
                 <Gamepad2 size={28} className="text-violet-400" />
               </div>
               <div className="flex flex-col">
-                <span className="font-extrabold text-2xl tracking-tight text-white">VIBE DIARY</span>
+                <span className="font-extrabold text-2xl tracking-tight text-white">{settings.general.siteName.toUpperCase()}</span>
               </div>
             </Link>
             <p className="text-slate-400 text-lg leading-relaxed max-w-sm">
@@ -125,7 +128,7 @@ export function Footer() {
 
           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
             <Tag size={12} className="text-emerald-400" />
-            <span className="text-xs font-bold text-emerald-400">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
+            <span className="text-xs font-bold text-emerald-400">v{appVersion}</span>
             <span className="text-[10px] text-emerald-500/70 font-semibold uppercase tracking-wider">{t('footer.release')}</span>
           </div>
           

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { fetchGameById, updateGame, deleteGame, addGame, fetchCommunityRatings, Game, DetailedRatings, CommunityRatings, getNormalizedScore } from '@/lib/supabase';
+import { fetchGameById, updateGame, deleteGame, addGame, fetchCommunityRatings, fetchGameCustomContent, Game, DetailedRatings, CommunityRatings, GameCustomContent, getNormalizedScore } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import { StatusSelector } from '@/components';
 import { 
@@ -16,6 +16,7 @@ import {
 } from '@/lib/rawg';
 import { ArrowLeft, Trash2, Loader, Share2, Plus } from 'lucide-react';
 import { useTranslation } from '@/i18n';
+import { useSiteSettings } from '@/lib/siteSettings';
 
 // Dynamic imports for heavy components (code-split)
 const ReviewEditor = dynamic(() => import('@/components/ReviewEditor').then(m => ({ default: m.ReviewEditor })));
@@ -48,26 +49,46 @@ export default function GameDetailPage() {
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [communityRatings, setCommunityRatings] = useState<CommunityRatings | null>(null);
+  const [customContent, setCustomContent] = useState<GameCustomContent | null>(null);
   const { t } = useTranslation();
+  const { isFeatureEnabled } = useSiteSettings();
 
   // Read-only mode: viewing by RAWG ID without owning the game
   const isReadOnly = isRawgId && !game?.id;
 
+  const getSettledValue = <T,>(result: PromiseSettledResult<T>, fallback: T): T => {
+    if (result.status === 'fulfilled') {
+      return result.value;
+    }
+
+    console.warn('Non-blocking game detail request failed:', result.reason);
+    return fallback;
+  };
+
   useEffect(() => {
     async function loadGame() {
       setIsLoading(true);
+      setError(null);
       try {
         if (isRawgId) {
           // Numeric ID → load from RAWG API directly
           const rawgId = parseInt(gameId, 10);
-          const [details, shots, similar, community] = await Promise.all([
+          const [detailsResult, shotsResult, similarResult, communityResult, customResult] = await Promise.allSettled([
             getGameDetails(rawgId),
             getGameScreenshots(rawgId),
             getSimilarGames(rawgId),
             fetchCommunityRatings(rawgId),
+            fetchGameCustomContent(rawgId),
           ]);
 
+          const details = getSettledValue(detailsResult, null);
+          const shots = getSettledValue(shotsResult, []);
+          const similar = getSettledValue(similarResult, []);
+          const community = getSettledValue(communityResult, null);
+          const custom = getSettledValue(customResult, null);
+
           setCommunityRatings(community);
+          setCustomContent(custom);
 
           if (details) {
             setGameDetails(details);
@@ -96,17 +117,25 @@ export default function GameDetailPage() {
 
             if (data.rawg_id) {
               try {
-                const [details, shots, similar, community] = await Promise.all([
+                const [detailsResult, shotsResult, similarResult, communityResult, customResult] = await Promise.allSettled([
                   getGameDetails(data.rawg_id),
                   getGameScreenshots(data.rawg_id),
                   getSimilarGames(data.rawg_id),
                   fetchCommunityRatings(data.rawg_id),
+                  fetchGameCustomContent(data.rawg_id),
                 ]);
+
+                const details = getSettledValue(detailsResult, null);
+                const shots = getSettledValue(shotsResult, []);
+                const similar = getSettledValue(similarResult, []);
+                const community = getSettledValue(communityResult, null);
+                const custom = getSettledValue(customResult, null);
 
                 setGameDetails(details || null);
                 setScreenshots(shots || []);
                 setSimilarGames(similar || []);
                 setCommunityRatings(community);
+                setCustomContent(custom);
               } catch (rawgErr) {
                 console.warn('Failed to load RAWG data:', rawgErr);
               }
@@ -235,11 +264,11 @@ export default function GameDetailPage() {
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-violet-600/15 blur-[80px] rounded-full pointer-events-none" />
 
       {/* Cinematic Background Banner */}
-      {(game.cover_url || screenshots[0]?.image || gameDetails?.background_image) && (
+      {(customContent?.banner_url || game.cover_url || screenshots[0]?.image || gameDetails?.background_image) && (
         <>
         <div className="absolute top-0 left-0 w-full h-[80vh] z-0 pointer-events-none overflow-hidden">
           <Image
-            src={gameDetails?.background_image || screenshots[0]?.image || game.cover_url!}
+            src={customContent?.banner_url || gameDetails?.background_image || screenshots[0]?.image || game.cover_url!}
             alt={game.title}
             fill
             className="object-cover object-top opacity-15 mix-blend-screen scale-105"
@@ -293,7 +322,7 @@ export default function GameDetailPage() {
                 </Link>
               )}
 
-              {!isReadOnly && (
+              {isFeatureEnabled('sharing') && !isReadOnly && (
                 <button
                   onClick={() => setIsShareModalOpen(true)}
                   className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 border border-violet-400/20 rounded-xl text-white font-bold transition-all shadow-lg shadow-violet-900/40 group active:scale-95"
@@ -312,6 +341,11 @@ export default function GameDetailPage() {
               {/* Title Section */}
               <div>
                 <div className="flex items-center gap-3 mb-4">
+                  {customContent?.logo_url && (
+                    <div className="w-16 h-16 rounded-xl overflow-hidden border border-white/10 shadow-lg shrink-0">
+                      <Image src={customContent.logo_url} alt="" width={64} height={64} className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   {game.release_date && (
                     <span className="px-3 py-1 bg-slate-700/60 rounded-full text-sm text-slate-300 border border-slate-600/50">
                       {new Date(game.release_date).toLocaleDateString('en-US', {
@@ -332,7 +366,24 @@ export default function GameDetailPage() {
                     {game.genres}
                   </p>
                 )}
+                {customContent?.tags && customContent.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {customContent.tags.map((tag) => (
+                      <span key={tag} className="px-3 py-1 bg-emerald-900/30 border border-emerald-500/20 text-emerald-300 text-xs font-bold rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* Custom Description from admin */}
+              {customContent?.description && (
+                <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
+                  <h3 className="text-lg font-semibold text-white mb-3">{t('gameDetail.adminDescription')}</h3>
+                  <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{customContent.description}</p>
+                </div>
+              )}
 
               {/* Status Selector Card */}
               {!isReadOnly && (
@@ -377,14 +428,14 @@ export default function GameDetailPage() {
               )}
 
               {/* Community Rating Radar */}
-              {communityRatings && (
+              {isFeatureEnabled('communityRatings') && communityRatings && (
                 <div className="mt-8">
                   <CommunityRatingRadar ratings={communityRatings} />
                 </div>
               )}
 
               {/* Steam Deck Companion */}
-              {!isReadOnly && (
+              {isFeatureEnabled('steamDeck') && !isReadOnly && (
               <div className="mt-8">
                 <SteamDeckCompanion 
                   status={game.steam_deck_status}
@@ -395,7 +446,7 @@ export default function GameDetailPage() {
               )}
 
               {/* Review Editor Card */}
-              {!isReadOnly && (
+              {isFeatureEnabled('reviews') && !isReadOnly && (
               <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <h3 className="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">
                   {t('gameDetail.myReview')}
@@ -411,7 +462,7 @@ export default function GameDetailPage() {
               )}
 
               {/* Community Discussions */}
-              {redditPosts.length > 0 && (
+              {isFeatureEnabled('discussions') && redditPosts.length > 0 && (
                 <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                   <CommunityDiscussions posts={redditPosts} />
                 </div>
@@ -470,10 +521,35 @@ export default function GameDetailPage() {
             <div className="lg:col-span-1 space-y-6">
               <div className="sticky top-8 space-y-6">
 
-                {screenshots.length > 0 && (
+                {isFeatureEnabled('screenshots') && (screenshots.length > 0 || (customContent?.screenshots?.length ?? 0) > 0) && (
                   <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                     <h3 className="text-lg font-semibold text-white mb-4">{t('gameDetail.screenshots')}</h3>
                   <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    {/* Custom screenshots from admin */}
+                    {customContent?.screenshots?.map((url, idx) => (
+                      <div
+                        key={`custom-${idx}`}
+                        className="relative h-32 rounded-lg overflow-hidden cursor-pointer group shadow-lg hover:shadow-xl transition-shadow"
+                        onClick={() => setSelectedScreenshot(url)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && setSelectedScreenshot(url)}
+                      >
+                        <Image
+                          src={url}
+                          alt={`Custom screenshot ${idx + 1}`}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, 300px"
+                        />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-white text-2xl drop-shadow-lg">🔍</span>
+                        </div>
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-emerald-500/80 text-white text-[10px] font-bold rounded-full uppercase">Custom</span>
+                      </div>
+                    ))}
+                    {/* RAWG screenshots */}
                     {screenshots.slice(0, 8).map((screenshot, idx) => (
                       <div
                         key={screenshot.id}
@@ -504,7 +580,7 @@ export default function GameDetailPage() {
           </div>
 
           {/* Similar Games Section */}
-          {similarGames.length > 0 && (
+          {isFeatureEnabled('similarGames') && similarGames.length > 0 && (
             <div className="mt-16 pt-8 border-t border-slate-700/50">
               <div className="bg-slate-900/60 backdrop-blur-xl border border-white/5 rounded-2xl p-6 shadow-2xl">
                 <SimilarGames games={similarGames} />

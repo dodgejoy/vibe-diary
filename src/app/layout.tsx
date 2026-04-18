@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Header, Footer, AuthProvider, AuthGate } from "@/components";
+import { Header, Footer, AuthProvider, AuthGate, AnnouncementBanner } from "@/components";
 import { I18nProvider } from "@/i18n";
+import { SiteSettingsProvider } from "@/lib/siteSettings";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,13 +33,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
         <I18nProvider>
+        <SiteSettingsProvider>
         <AuthProvider>
+          <AnnouncementBanner />
           <Header />
           <main className="flex-1 bg-gradient-to-b from-slate-950 to-slate-900">
             <AuthGate>{children}</AuthGate>
           </main>
           <Footer />
         </AuthProvider>
+        </SiteSettingsProvider>
         </I18nProvider>
       </body>
     </html>

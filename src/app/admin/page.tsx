@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Shield, Star, UserCircle2, Users, Gamepad2, Loader, Crown, RefreshCcw, Search, Trash2 } from 'lucide-react';
-import { useAuth } from '@/components';
+import { Shield, Star, UserCircle2, Users, Gamepad2, Loader, Crown, RefreshCcw, Search, Trash2, LayoutDashboard, SlidersHorizontal, FolderOpen } from 'lucide-react';
+import { useAuth, AdminControlPanel, ContentManager } from '@/components';
 import {
   deleteAnyGameAsAdmin,
   fetchAdminGames,
@@ -22,6 +22,7 @@ type UserSummary = UserProfile & {
 export default function AdminPage() {
   const { profile, user } = useAuth();
   const { t } = useTranslation();
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'control' | 'content'>('dashboard');
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [games, setGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,7 +169,7 @@ export default function AdminPage() {
             <p className="text-slate-400 max-w-2xl leading-relaxed">
               {t('adminPanel.accessNote')} <span className="text-slate-200 font-semibold">{t('adminPanel.accessNoteRole')}</span>{t('adminPanel.accessNoteSuffix')}
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={() => loadDashboard(true)}
                 disabled={isRefreshing}
@@ -181,12 +182,54 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Section Tabs */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => setActiveSection('dashboard')}
+            className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+              activeSection === 'dashboard'
+                ? 'bg-amber-500/15 border border-amber-500/25 text-amber-200 shadow-lg shadow-amber-500/5'
+                : 'bg-slate-900/40 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <LayoutDashboard size={18} />
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveSection('control')}
+            className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+              activeSection === 'control'
+                ? 'bg-violet-500/15 border border-violet-500/25 text-violet-200 shadow-lg shadow-violet-500/5'
+                : 'bg-slate-900/40 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <SlidersHorizontal size={18} />
+            {t('controlPanel.title')}
+            <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-[10px] font-black uppercase tracking-wider text-violet-300">
+              {t('controlPanel.badge')}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveSection('content')}
+            className={`inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+              activeSection === 'content'
+                ? 'bg-emerald-500/15 border border-emerald-500/25 text-emerald-200 shadow-lg shadow-emerald-500/5'
+                : 'bg-slate-900/40 border border-white/5 text-slate-400 hover:text-white hover:bg-slate-800/60'
+            }`}
+          >
+            <FolderOpen size={18} />
+            {t('contentManager.tab')}
+          </button>
+        </div>
+
         {error && (
           <div className="rounded-3xl border border-rose-500/20 bg-rose-500/10 p-5 text-rose-200">
             {error}
           </div>
         )}
 
+        {activeSection === 'dashboard' ? (
+        <>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
             <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
@@ -374,6 +417,12 @@ export default function AdminPage() {
             )}
           </div>
         </div>
+        </>
+        ) : activeSection === 'control' ? (
+          <AdminControlPanel />
+        ) : (
+          <ContentManager />
+        )}
       </div>
     </div>
   );
